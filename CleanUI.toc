@@ -1,0 +1,25 @@
+## Interface: 30300
+## Title: CleanUI
+## SavedVariables: CleanUIPositions, CleanUI_UseClassPortraits
+## Notes: Default UI overhaul
+## Author: @jonasalv @narchda
+## Version: 1.0.0
+
+# 1. Initialize
+Core.lua
+
+# 2. Load Tools
+API\Mover.lua
+API\Portraits.lua
+API\Theme.lua
+
+# 3. Load Modules
+modules\ActionBar.lua
+modules\Tooltip.lua
+modules\Player.lua
+modules\Target.lua
+modules\Focus.lua
+modules\Party.lua
+modules\Character.lua
+modules\Inspect.lua
+modules\Loot.lua
