@@ -19,6 +19,8 @@ Access features and management via the `/cui` command:
 | `/cui loot test` | Toggles test mode for loot frames to adjust positioning. |
 | `/cui party test`| Toggles test mode for party frames to preview layout. |
 | `/cui reset` | Resets all frame positions to default and reloads the UI. |
+| Hold `CTRL+SHIFT` | To drag and move frames. |
+
 
 ## Installation
 1. Place the `CleanUI` folder into your `Interface/AddOns/` directory(make sure the folder containing the addon files is named "CleanUI").
