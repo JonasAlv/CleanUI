@@ -23,7 +23,7 @@ local function InjectPlayerPortrait()
         f.CleanUI_PlayerIcon:SetPoint("TOPLEFT", f, "TOPLEFT", -6, 6) 
         f.CleanUI_PlayerIcon:SetFrameLevel(f:GetFrameLevel() + 1)
         
-        -- Force the metal border to crop our icon
+        -- fix char panel(C) class icon(our icon), forcing the borders to crop it
         local border = AscensionCharacterFrameNineSlice or CharacterFrameNineSlice
         if border then border:SetFrameLevel(f.CleanUI_PlayerIcon:GetFrameLevel() + 2) end
 

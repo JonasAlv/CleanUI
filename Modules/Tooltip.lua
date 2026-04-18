@@ -1,7 +1,7 @@
 local _, UI = ...
 
 hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
-    -- This ensures regular world tooltips stay perfectly tucked in the corner
+    -- fixed world tooltips position, dont touch
     tooltip:SetOwner(parent, "ANCHOR_NONE")
     tooltip:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -25, 25)
 end)
@@ -53,7 +53,6 @@ ErrorGatekeeper:RegisterEvent("UI_ERROR_MESSAGE")
 ErrorGatekeeper:SetScript("OnEvent", function(self, event, msg)
     if not msg then return end
     
-    -- Total silence during combat. 
     if InCombatLockdown() then return end
     
     UIErrorsFrame:AddMessage(msg, 1.0, 0.1, 0.1, 1.0)

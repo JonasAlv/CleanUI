@@ -21,7 +21,6 @@ for i = 1, 4 do
     end
 end
 
--- events
 local F = CreateFrame("Frame")
 F:RegisterEvent("PARTY_MEMBERS_CHANGED")
 F:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -48,7 +47,7 @@ function UI.UpdatePartyLayout()
                 pf:Show()
                 pf:SetAlpha(1)
                 if pet then pet:Show(); pet:SetAlpha(1) end 
-                
+                -- test mode
                 local testClass = (i == 1 and "PALADIN") or (i == 2 and "WARRIOR") or (i == 3 and "HUNTER") or "PRIEST"
                 
                 UI.ApplyClassTheme("party"..i, testClass)
@@ -57,7 +56,7 @@ function UI.UpdatePartyLayout()
                     UI.ApplyClassTheme("partypet"..i, "WARLOCK") 
                 end
             else
-                -- LIVE MODE
+                -- live mode
                 if UnitExists("party"..i) then pf:SetAlpha(1) else pf:SetAlpha(0) end
                 if pet then 
                     if UnitExists("partypet"..i) then pet:SetAlpha(1) else pet:SetAlpha(0) end
@@ -67,7 +66,6 @@ function UI.UpdatePartyLayout()
                 if pet then UI.ApplyClassTheme("partypet"..i) end
             end
 
-            -- anchors
             local savedPos = CleanUIPositions and CleanUIPositions["Party"..i]
             
             pf:ClearAllPoints()
