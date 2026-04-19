@@ -1,9 +1,13 @@
 local _, UI = ...
 
 hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
-    -- fixed world tooltips position, dont touch
     tooltip:SetOwner(parent, "ANCHOR_NONE")
-    tooltip:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -25, 25)
+    
+    if MainMenuBarBackpackButton then
+        tooltip:SetPoint("BOTTOMRIGHT", MainMenuBarBackpackButton, "TOPRIGHT", -15, 20)
+    else
+        tooltip:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -25, 120)
+    end
 end)
 
 local function StyleTooltip(self)
@@ -61,6 +65,7 @@ end)
 local CombatWatch = CreateFrame("Frame")
 CombatWatch:RegisterEvent("PLAYER_REGEN_DISABLED")
 CombatWatch:SetScript("OnEvent", function()
+
     if GameTooltip:IsShown() then 
         local hasItem = GameTooltip:GetItem()
         local hasSpell = GameTooltip:GetSpell()

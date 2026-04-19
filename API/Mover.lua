@@ -54,7 +54,7 @@ local function HideAlignmentGrid()
     if GridFrame then GridFrame:Hide() end
 end
 
-function UI.MakeMovableAndSave(frame, name)
+function UI.MakeMovableAndSave(frame, name, showLabel)
     if not frame or frame.isMovableSet then return end
     CleanUIPositions = CleanUIPositions or {}
     
@@ -71,6 +71,44 @@ function UI.MakeMovableAndSave(frame, name)
     else
         frame:SetUserPlaced(false)
     end
+
+    local originalStrata = frame:GetFrameStrata()
+
+    if not frame.cleanUI_highlight then
+        frame.cleanUI_highlight = frame:CreateTexture(nil, "OVERLAY")
+        frame.cleanUI_highlight:SetAllPoints()
+        frame.cleanUI_highlight:SetColorTexture(0, 1, 0, 0.2) 
+        frame.cleanUI_highlight:Hide()
+
+        if showLabel then
+            frame.cleanUI_text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+            frame.cleanUI_text:SetPoint("CENTER", frame, "CENTER", 0, 0)
+            
+            local displayName = string.upper(name:gsub("Anchor", ""))
+            frame.cleanUI_text:SetText(displayName)
+            
+            frame.cleanUI_text:SetTextColor(1, 1, 1, 1)
+            frame.cleanUI_text:SetShadowOffset(1, -1)
+            frame.cleanUI_text:SetShadowColor(0, 0, 0, 1)
+            frame.cleanUI_text:Hide()
+        end
+    end
+
+    frame:HookScript("OnUpdate", function(self)
+        if (IsShiftKeyDown() and IsControlKeyDown()) or self.isCleanUIMoving then
+            if not InCombatLockdown() then
+                self:SetFrameStrata("DIALOG") 
+                self.cleanUI_highlight:Show()
+                if self.cleanUI_text then self.cleanUI_text:Show() end
+            end
+        else
+            if not self.isCleanUIMoving then
+                self:SetFrameStrata(originalStrata) 
+                self.cleanUI_highlight:Hide()
+                if self.cleanUI_text then self.cleanUI_text:Hide() end
+            end
+        end
+    end)
 
     frame:SetScript("OnMouseDown", function(self, btn)
         if IsShiftKeyDown() and IsControlKeyDown() and btn == "LeftButton" then 

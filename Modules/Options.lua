@@ -28,7 +28,8 @@ button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 button:SetMovable(true)
 
 local function UpdatePosition()
-    local angle = (CleanUIPositions and CleanUIPositions["MinimapButton"]) or 45
+    if not CleanUIPositions then CleanUIPositions = {} end
+    local angle = CleanUIPositions["MinimapButton"] or 45
     local radius = 80
     
     local rad = math.rad(angle)
@@ -45,15 +46,11 @@ button:SetScript("OnDragStart", function(self)
         local mx, my = Minimap:GetCenter()
         local px, py = GetCursorPosition()
         local scale = Minimap:GetEffectiveScale()
-        
         px, py = px / scale, py / scale
-        
         local angle = math.deg(math.atan2(py - my, px - mx))
         if angle < 0 then angle = angle + 360 end
         
-        if not CleanUIPositions then CleanUIPositions = {} end
         CleanUIPositions["MinimapButton"] = angle
-        
         UpdatePosition()
     end)
 end)
@@ -68,41 +65,64 @@ local DropdownMenu = CreateFrame("Frame", "CleanUIDropdownMenu", UIParent, "UIDr
 local function InitializeMenu(self, level)
     local info = UIDropDownMenu_CreateInfo()
 
-    info.isTitle = true
-    info.text = "CleanUI Options"
-    info.notCheckable = true
+    -- HEADER
+    info.isTitle = true; info.text = "CleanUI Options"; info.notCheckable = true
     UIDropDownMenu_AddButton(info, level)
 
     info = UIDropDownMenu_CreateInfo()
-    info.text = "Toggle Class Icons / 3D Faces"
-    info.notCheckable = true
+    info.text = "Toggle Portraits (Class/3D)"; info.notCheckable = true
     info.func = function() SlashCmdList["CLEANUI"]("portrait") end
     UIDropDownMenu_AddButton(info, level)
 
     info = UIDropDownMenu_CreateInfo()
-    info.text = "Toggle Loot Test Mode"
-    info.notCheckable = true
+    info.text = "Loot Test Mode"; info.notCheckable = true
     info.func = function() SlashCmdList["CLEANUI"]("loot test") end
     UIDropDownMenu_AddButton(info, level)
 
     info = UIDropDownMenu_CreateInfo()
-    info.text = "Toggle Party Test Mode"
-    info.notCheckable = true
+    info.text = "Party Test Mode"; info.notCheckable = true
     info.func = function() SlashCmdList["CLEANUI"]("party test") end
     UIDropDownMenu_AddButton(info, level)
 
     info = UIDropDownMenu_CreateInfo()
-    info.text = "Reset All Positions & Reload"
-    info.notCheckable = true
+    info.isTitle = true; info.text = "Bottom Bar Settings"; info.notCheckable = true
+    UIDropDownMenu_AddButton(info, level)
+
+    local function ToggleActionBar(barID)
+        local varName = "SHOW_MULTI_ACTIONBAR_" .. barID
+        
+        _G[varName] = not _G[varName] and 1 or nil
+        
+        SetActionBarToggles(
+            SHOW_MULTI_ACTIONBAR_1, 
+            SHOW_MULTI_ACTIONBAR_2, 
+            SHOW_MULTI_ACTIONBAR_3, 
+            SHOW_MULTI_ACTIONBAR_4, 
+            tonumber(GetCVar("alwaysShowActionBars"))
+        )
+        
+        MultiActionBar_Update()
+        if UIParent_ManageFramePositions then UIParent_ManageFramePositions() end
+    end
+
+    for i = 1, 2 do
+        local label = (i == 1 and "Show Bar 2 (Bottom Left)") or ("Show Bar 3 (Bottom Right)")
+        info = UIDropDownMenu_CreateInfo()
+        info.text = label
+        info.func = function() ToggleActionBar(i) end
+        info.checked = _G["SHOW_MULTI_ACTIONBAR_" .. i]
+        UIDropDownMenu_AddButton(info, level)
+    end
+
+    info = UIDropDownMenu_CreateInfo()
+    info.text = "|cffff0000Reset UI & Reload|r"; info.notCheckable = true
     info.func = function() SlashCmdList["CLEANUI"]("reset") end
     UIDropDownMenu_AddButton(info, level)
 end
 
-UIDropDownMenu_Initialize(DropdownMenu, InitializeMenu, "MENU")
-
 button:SetScript("OnClick", function(self, btn)
     if btn == "LeftButton" then
-        print("|cff00ff00CleanUI:|r Right-click the Minimap button for options!")
+        print("|cff00ff00CleanUI:|r Right-click CUI button for settings.")
     elseif btn == "RightButton" then
         ToggleDropDownMenu(1, nil, DropdownMenu, "cursor", 3, -3)
     end
@@ -111,18 +131,22 @@ end)
 button:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
     GameTooltip:AddLine("CleanUI", 1, 0.82, 0)
-    GameTooltip:AddLine("Left Click: Show Info", 1, 1, 1)
-    GameTooltip:AddLine("Right Click: Open Options Menu", 1, 1, 1)
+    GameTooltip:AddLine("Left Click: Info", 1, 1, 1)
+    GameTooltip:AddLine("Right Click: Options", 1, 1, 1)
     GameTooltip:AddLine("Drag: Move Button", 0.5, 0.5, 0.5)
     GameTooltip:Show()
 end)
 
-button:SetScript("OnLeave", function(self)
-    GameTooltip:Hide()
-end)
+button:SetScript("OnLeave", function(self) GameTooltip:Hide() end)
 
 local Init = CreateFrame("Frame")
 Init:RegisterEvent("PLAYER_LOGIN")
-Init:SetScript("OnEvent", function()
+Init:RegisterEvent("CVAR_UPDATE") 
+
+Init:SetScript("OnEvent", function(self, event)
     UpdatePosition()
+    
+    if event == "PLAYER_LOGIN" then
+        UIDropDownMenu_Initialize(DropdownMenu, InitializeMenu, "MENU")
+    end
 end)

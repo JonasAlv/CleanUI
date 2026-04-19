@@ -5,7 +5,6 @@ UI.ClassPath = "Interface\\AddOns\\CleanUI\\Media\\classes\\"
 local Setup = CreateFrame("Frame")
 Setup:RegisterEvent("PLAYER_LOGIN")
 Setup:SetScript("OnEvent", function()
-
     if CleanUI_UseClassPortraits == nil then CleanUI_UseClassPortraits = true end
 
     if TargetFrameToTHealthBar then UI.ProtectFrame(TargetFrameToTHealthBar) end
@@ -21,7 +20,10 @@ SlashCmdList["CLEANUI"] = function(msg)
         
         local frames = {
             PlayerFrame, TargetFrame, FocusFrame, PetFrame, 
-            TargetFrameToT, FocusFrameToT, CleanUILootAnchor
+            TargetFrameToT, FocusFrameToT, 
+            CleanUILootAnchor,      
+            CleanUIActionBarAnchor, 
+            CleanUIPartyAnchor      
         }
         
         for i = 1, 4 do
@@ -36,7 +38,8 @@ SlashCmdList["CLEANUI"] = function(msg)
                 f:ClearAllPoints()     
             end 
         end
-        print("|cff00ff00CleanUI:|r All positions reset. Reloading...")
+
+        print("|cff00ff00CleanUI:|r Positions reset to defaults. Reloading...")
         ReloadUI()
 
     elseif msg:find("loot") and msg:find("test") then

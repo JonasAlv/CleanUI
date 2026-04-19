@@ -3,7 +3,7 @@
 ## SavedVariables: CleanUIPositions, CleanUI_UseClassPortraits
 ## Notes: Default UI overhaul
 ## Author: @jonasalv @narchda
-## Version: 1.0.0
+## Version: 1.0.1
 
 # 1. Initialize
 Core.lua
@@ -24,3 +24,4 @@ modules\Character.lua
 modules\Inspect.lua
 modules\Loot.lua
 modules\Options.lua
+modules\Chat.lua

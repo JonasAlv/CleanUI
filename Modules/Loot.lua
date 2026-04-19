@@ -4,7 +4,7 @@ local anchor = CreateFrame("Frame", "CleanUILootAnchor", UIParent)
 anchor:SetSize(280, 72)
 anchor:SetPoint("BOTTOM", UIParent, "BOTTOM", 350, 150)
 
-UI.MakeMovableAndSave(anchor, "LootStack")
+UI.MakeMovableAndSave(anchor, "LootStack", true)
 
 if UIPARENT_MANAGED_FRAME_POSITIONS then
     UIPARENT_MANAGED_FRAME_POSITIONS["GroupLootFrame1"] = nil
