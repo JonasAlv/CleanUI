@@ -4,10 +4,10 @@ F:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 local function ApplyCleanSkin()
 
---     _G["SHOW_MULTI_ACTIONBAR_1"] = nil   
---     _G["SHOW_MULTI_ACTIONBAR_2"] = nil 
---     _G["SHOW_MULTI_ACTIONBAR_3"] = nil 
---     _G["SHOW_MULTI_ACTIONBAR_4"] = nil 
+    _G["SHOW_MULTI_ACTIONBAR_1"] = nil   
+    _G["SHOW_MULTI_ACTIONBAR_2"] = nil 
+    _G["SHOW_MULTI_ACTIONBAR_3"] = nil 
+    _G["SHOW_MULTI_ACTIONBAR_4"] = nil 
     
 --     SetCVar("lockActionBars", "1")
 --     MultiActionBar_Update()
