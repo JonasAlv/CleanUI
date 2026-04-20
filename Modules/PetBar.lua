@@ -1,10 +1,6 @@
 local _, UI = ...
 local F = CreateFrame("Frame")
 F:RegisterEvent("PLAYER_ENTERING_WORLD")
-F:RegisterEvent("PET_BAR_UPDATE")
-F:RegisterEvent("PET_BAR_UPDATE_STATE")
-F:RegisterEvent("PET_BAR_UPDATE_COOLDOWN")
-F:RegisterEvent("UNIT_PET")
 
 local Hider = CreateFrame("Frame", "CleanUIPetHider", UIParent)
 Hider:Hide()
@@ -34,67 +30,44 @@ local function RedirectReleaseToAnchor(self, button)
     end
 end
 
-local function UpdatePetButtons()
-    for i = 1, 10 do
-        local btn = _G["PetActionButton"..i]
-        if btn then
-            local name, subtext, texture, isToken, isActive, autoCastAllowed, autoCastEnabled = GetPetActionInfo(i)
-            
-            local icon = _G[btn:GetName().."Icon"]
-            if icon then
-                if texture then
-                    icon:SetTexture(texture)
-                    icon:SetTexCoord(0, 1, 0, 1) 
-                    icon:Show()
-                else
-                    icon:Hide()
-                end
-            end
-
-            local cd = _G[btn:GetName().."Cooldown"]
-            if cd then
-                local start, duration, enable = GetPetActionCooldown(i)
-                CooldownFrame_SetTimer(cd, start, duration, enable)
-            end
-
-            btn:SetChecked(isActive)
-
-            local shine = _G[btn:GetName().."Shine"]
-            if shine then
-                if autoCastEnabled then
-                    AutoCastShine_AutoCastStart(shine)
-                else
-                    AutoCastShine_AutoCastStop(shine)
-                end
-            end
-
-            local nt = btn:GetNormalTexture()
-            if nt then 
-                nt:SetAlpha(1)
-            end
-        end
+local function SkinButton(btn)
+    if not btn then return end
+    local name = btn:GetName()
+    local icon = _G[name.."Icon"]
+    if icon then icon:SetTexCoord(0, 1, 0, 1) end
+    if btn:GetNormalTexture() then btn:GetNormalTexture():SetAlpha(1) end
+    
+    if not btn.cleanUIHooked then
+        btn:HookScript("OnMouseDown", RedirectClickToAnchor)
+        btn:HookScript("OnMouseUp", RedirectReleaseToAnchor)
+        btn.cleanUIHooked = true
     end
 end
-
 
 local function ApplyPetBarSkin()
     local petAnchor = _G["CleanUIPetBarAnchor"] or CreateFrame("Frame", "CleanUIPetBarAnchor", UIParent, "SecureHandlerStateTemplate")
     petAnchor:SetSize(350, 35) 
     
-    if not petAnchor:GetPoint() then
-        petAnchor:ClearAllPoints()
-        petAnchor:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 10, 10)
-    end
+    -- Set default position to the bottom-left edge of the screen
+    petAnchor:ClearAllPoints()
+    petAnchor:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 0)
     petAnchor:SetClampedToScreen(true)
     
+    -- If you have a saved configuration, this function will automatically overwrite the 0,0 default
     if UI.MakeMovableAndSave then 
         UI.MakeMovableAndSave(petAnchor, "PetBarAnchor") 
     end
 
+    -- Neutralize Blizzard's Pet Bar Frame, but KEEP events running natively
     if PetActionBarFrame then
-        PetActionBarFrame:UnregisterAllEvents()
-        PetActionBarFrame:SetParent(Hider)
-        PetActionBarFrame.ignoreFramePositionManager = true
+        PetActionBarFrame:SetAlpha(0)
+        PetActionBarFrame:EnableMouse(false)
+        PetActionBarFrame:SetSize(1, 1)
+    end
+
+    local artFrames = {SlidingActionBarTexture0, SlidingActionBarTexture1}
+    for _, frame in ipairs(artFrames) do
+        if frame then frame:SetParent(Hider) end
     end
 
     for i = 1, 10 do
@@ -110,24 +83,16 @@ local function ApplyPetBarSkin()
                 btn:SetPoint("LEFT", _G["PetActionButton"..(i-1)], "RIGHT", 6, 0)
             end
 
-            -- Movement Hooks
-            if not btn.cleanUIHooked then
-                btn:HookScript("OnMouseDown", RedirectClickToAnchor)
-                btn:HookScript("OnMouseUp", RedirectReleaseToAnchor)
-                btn.cleanUIHooked = true
-            end
+            SkinButton(btn)
         end
     end
 
+    -- State Driver handles visibility cleanly based on pet existence
     RegisterStateDriver(petAnchor, "visibility", "[pet] show; hide")
-    UpdatePetButtons()
 end
 
 F:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then
         ApplyPetBarSkin()
     end
-    UpdatePetButtons()
 end)
-
-hooksecurefunc("PetActionBar_Update", UpdatePetButtons)
