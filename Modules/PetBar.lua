@@ -48,17 +48,14 @@ local function ApplyPetBarSkin()
     local petAnchor = _G["CleanUIPetBarAnchor"] or CreateFrame("Frame", "CleanUIPetBarAnchor", UIParent, "SecureHandlerStateTemplate")
     petAnchor:SetSize(350, 35) 
     
-    -- Set default position to the bottom-left edge of the screen
     petAnchor:ClearAllPoints()
     petAnchor:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 0)
     petAnchor:SetClampedToScreen(true)
     
-    -- If you have a saved configuration, this function will automatically overwrite the 0,0 default
     if UI.MakeMovableAndSave then 
         UI.MakeMovableAndSave(petAnchor, "PetBarAnchor") 
     end
 
-    -- Neutralize Blizzard's Pet Bar Frame, but KEEP events running natively
     if PetActionBarFrame then
         PetActionBarFrame:SetAlpha(0)
         PetActionBarFrame:EnableMouse(false)
@@ -87,7 +84,6 @@ local function ApplyPetBarSkin()
         end
     end
 
-    -- State Driver handles visibility cleanly based on pet existence
     RegisterStateDriver(petAnchor, "visibility", "[pet] show; hide")
 end
 
