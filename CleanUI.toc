@@ -3,7 +3,7 @@
 ## SavedVariables: CleanUIPositions, CleanUI_UseClassPortraits
 ## Notes: Default UI overhaul
 ## Author: @jonasalv @narchda
-## Version: 1.0.7
+## Version: 1.0.8
 
 # 1. Initialize
 Core.lua

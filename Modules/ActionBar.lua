@@ -19,10 +19,7 @@ local function SkinButton(btn)
         icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) 
     end
     
-    if nt then 
-        nt:SetAlpha(1) 
-    end
-
+    if nt then nt:SetAlpha(1) end
     if flash then flash:SetTexture(nil) end
     if btn.SetPushedTexture then btn:SetPushedTexture(nil) end
     
@@ -62,25 +59,35 @@ local function ApplySelectiveLockdown()
 end
 
 local function ApplyCleanSkin()
-    local framesToHide = {
+    local framesToDisable = {
         MainMenuBarOverlayFrame, MainMenuBarMaxLevelBar,
         MainMenuExpBar, ReputationWatchBar, MainMenuBarPerformanceBarFrame,
+        ExhaustionTick, MainMenuBarArtFrame, BonusActionBarFrame,
+        ActionBarUpButton, ActionBarDownButton, MainMenuBarPageNumber, 
         CharacterMicroButton, SpellbookMicroButton, TalentMicroButton, QuestLogMicroButton, 
         SocialsMicroButton, WorldMapMicroButton, MainMenuMicroButton, HelpMicroButton,
         MainMenuBarBackpackButton, CharacterBag0Slot, CharacterBag1Slot, CharacterBag2Slot, CharacterBag3Slot, KeyRingButton
     }
-    for _, f in ipairs(framesToHide) do
-        if f then f:SetParent(Hider) end
+
+    for _, f in ipairs(framesToDisable) do
+        if f then 
+            f:UnregisterAllEvents()
+            f:Hide() 
+            f:SetParent(Hider) 
+        end
     end
 
     local texturesToHide = {
         MainMenuBarTexture0, MainMenuBarTexture1, MainMenuBarTexture2, MainMenuBarTexture3,
         MainMenuMaxLevelBar0, MainMenuMaxLevelBar1, MainMenuMaxLevelBar2, MainMenuMaxLevelBar3,
         BonusActionBarTexture0, BonusActionBarTexture1,
-        MainMenuBarLeftEndCap, MainMenuBarRightEndCap
+        MainMenuBarLeftEndCap, MainMenuBarRightEndCap 
     }
     for _, tex in ipairs(texturesToHide) do
-        if tex then tex:SetAlpha(0) end
+        if tex then 
+            tex:Hide()
+            tex:SetAlpha(0) 
+        end
     end
 
     for i = 1, 12 do
