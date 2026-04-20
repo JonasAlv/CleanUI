@@ -3,7 +3,7 @@
 ## SavedVariables: CleanUIPositions, CleanUI_UseClassPortraits
 ## Notes: Default UI overhaul
 ## Author: @jonasalv @narchda
-## Version: 1.0.2
+## Version: 1.0.3
 
 # 1. Initialize
 Core.lua
@@ -25,3 +25,9 @@ modules\Inspect.lua
 modules\Loot.lua
 modules\Options.lua
 modules\Chat.lua
+modules\MicroMenu.lua
+modules\PetBar.lua
+modules\StanceBar.lua
+modules\BagBar.lua
+modules\ExperienceBar.lua
+modules\TotemBar.lua

@@ -6,7 +6,7 @@ anchor:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 15, -150)
 anchor:SetFrameStrata("BACKGROUND") 
 
 if UI.MakeMovableAndSave then
-    UI.MakeMovableAndSave(anchor, "PartyAnchor", true)
+    UI.MakeMovableAndSave(anchor, "PartyAnchor")
 end
 
 for i = 1, 4 do
