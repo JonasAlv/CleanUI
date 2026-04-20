@@ -47,6 +47,11 @@ end
 local function EnforceBarPositions()
     if InCombatLockdown() then return end
     
+    if MainMenuBar then
+        MainMenuBar:ClearAllPoints()
+        MainMenuBar:SetPoint("BOTTOM", UIParent, "BOTTOM", 230, 15) 
+    end
+    
     if MultiBarBottomLeftButton1 and ActionButton1 then
         MultiBarBottomLeftButton1:ClearAllPoints()
         MultiBarBottomLeftButton1:SetPoint("BOTTOMLEFT", ActionButton1, "TOPLEFT", 0, 2)
@@ -56,13 +61,10 @@ local function EnforceBarPositions()
         MultiBarBottomRightButton1:ClearAllPoints()
         MultiBarBottomRightButton1:SetPoint("BOTTOMLEFT", MultiBarBottomLeftButton1, "TOPLEFT", 0, 2)
     end
-    
 end
 
 local function ApplyCleanSkin()
     MainMenuBar.ignoreFramePositionManager = true
-    MainMenuBar:ClearAllPoints()
-    MainMenuBar:SetPoint("BOTTOM", UIParent, "BOTTOM", 230, 15) 
     
     local framesToDisable = {
         MainMenuBarOverlayFrame, MainMenuBarMaxLevelBar,
