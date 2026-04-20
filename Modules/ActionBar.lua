@@ -18,17 +18,11 @@ local function SkinButton(btn)
         icon:SetAllPoints(btn)
         icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) 
     end
-    
     if nt then nt:SetAlpha(1) end
     if flash then flash:SetTexture(nil) end
     if btn.SetPushedTexture then btn:SetPushedTexture(nil) end
-    
-    if hotkey then
-        hotkey:SetFont("Fonts\\ARIALN.TTF", 12, "OUTLINE")
-    end
-
-    local border = _G[name.."Border"]
-    if border then border:SetAlpha(0) end 
+    if hotkey then hotkey:SetFont("Fonts\\ARIALN.TTF", 12, "OUTLINE") end
+    if _G[name.."Border"] then _G[name.."Border"]:SetAlpha(0) end 
 end
 
 local isLocking = false
@@ -48,6 +42,9 @@ local function ApplySelectiveLockdown()
     if MultiBarBottomLeft then
         MultiBarBottomLeft:ClearAllPoints()
         MultiBarBottomLeft:SetPoint("BOTTOMLEFT", ActionButton1, "TOPLEFT", 0, 2)
+        
+        MultiBarBottomLeft.ClearAllPoints = function() end
+        MultiBarBottomLeft.SetPoint = function() end
     end
     
     if MultiBarBottomRight then
@@ -55,15 +52,35 @@ local function ApplySelectiveLockdown()
         MultiBarBottomRight:SetPoint("BOTTOMLEFT", MultiBarBottomLeft, "TOPLEFT", 0, 2)
     end
 
+    if MainMenuBarPageNumber then
+        MainMenuBarPageNumber:SetParent(MainMenuBar)
+        MainMenuBarPageNumber:ClearAllPoints()
+        MainMenuBarPageNumber:SetPoint("LEFT", ActionButton12, "RIGHT", 12, 0)
+        MainMenuBarPageNumber:Show()
+    end
+
+    if ActionBarUpButton then
+        ActionBarUpButton:SetParent(MainMenuBar)
+        ActionBarUpButton:ClearAllPoints()
+        ActionBarUpButton:SetPoint("CENTER", MainMenuBarPageNumber, "CENTER", 0, 18)
+        ActionBarUpButton:Show()
+    end
+
+    if ActionBarDownButton then
+        ActionBarDownButton:SetParent(MainMenuBar)
+        ActionBarDownButton:ClearAllPoints()
+        ActionBarDownButton:SetPoint("CENTER", MainMenuBarPageNumber, "CENTER", 0, -18)
+        ActionBarDownButton:Show()
+    end
+
     isLocking = false
 end
 
 local function ApplyCleanSkin()
     local framesToDisable = {
-        MainMenuBarOverlayFrame, MainMenuBarMaxLevelBar,
-        MainMenuExpBar, ReputationWatchBar, MainMenuBarPerformanceBarFrame,
-        ExhaustionTick, MainMenuBarArtFrame, BonusActionBarFrame,
-        ActionBarUpButton, ActionBarDownButton, MainMenuBarPageNumber, 
+        MainMenuBarOverlayFrame, MainMenuBarMaxLevelBar, MainMenuExpBar, 
+        ReputationWatchBar, MainMenuBarPerformanceBarFrame, ExhaustionTick, 
+        MainMenuBarArtFrame, BonusActionBarFrame,
         CharacterMicroButton, SpellbookMicroButton, TalentMicroButton, QuestLogMicroButton, 
         SocialsMicroButton, WorldMapMicroButton, MainMenuMicroButton, HelpMicroButton,
         MainMenuBarBackpackButton, CharacterBag0Slot, CharacterBag1Slot, CharacterBag2Slot, CharacterBag3Slot, KeyRingButton
@@ -81,13 +98,10 @@ local function ApplyCleanSkin()
         MainMenuBarTexture0, MainMenuBarTexture1, MainMenuBarTexture2, MainMenuBarTexture3,
         MainMenuMaxLevelBar0, MainMenuMaxLevelBar1, MainMenuMaxLevelBar2, MainMenuMaxLevelBar3,
         BonusActionBarTexture0, BonusActionBarTexture1,
-        MainMenuBarLeftEndCap, MainMenuBarRightEndCap 
+        MainMenuBarLeftEndCap, MainMenuBarRightEndCap
     }
     for _, tex in ipairs(texturesToHide) do
-        if tex then 
-            tex:Hide()
-            tex:SetAlpha(0) 
-        end
+        if tex then tex:Hide(); tex:SetAlpha(0) end
     end
 
     for i = 1, 12 do

@@ -1,6 +1,5 @@
 local _, UI = ...
-
-local MAX_PLAYER_LEVEL_TABLE = { [0] = 60, [1] = 70, [2] = 80 }
+local MAX_LEVELS = { [0] = 60, [1] = 70, [2] = 80 }
 
 local F = CreateFrame("Frame")
 F:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -9,26 +8,18 @@ F:RegisterEvent("PLAYER_LEVEL_UP")
 F:RegisterEvent("UPDATE_EXHAUSTION")
 F:RegisterEvent("UPDATE_FACTION")
 
-local Hider = CreateFrame("Frame", nil, UIParent)
-Hider:Hide()
-
 local bar
 
 local function FormatNum(val)
-    if val >= 1e6 then
-        return string.format("%.1fm", val / 1e6):gsub("%.0m", "m")
-    elseif val >= 1e3 then
-        return string.format("%.1fk", val / 1e3):gsub("%.0k", "k")
-    else
-        return tostring(val)
-    end
+    if val >= 1e6 then return string.format("%.1fm", val / 1e6):gsub("%.0m", "m")
+    elseif val >= 1e3 then return string.format("%.1fk", val / 1e3):gsub("%.0k", "k")
+    else return tostring(val) end
 end
 
 local function UpdateBar()
     if not bar then return end
-    
     local name, standing, min, max, value = GetWatchedFactionInfo()
-    local maxLevel = MAX_PLAYER_LEVEL_TABLE[GetExpansionLevel()] or 80
+    local maxLevel = MAX_LEVELS[GetExpansionLevel()] or 80
     local isMaxLevel = UnitLevel("player") == maxLevel
 
     if name and (isMaxLevel or IsShiftKeyDown()) then
@@ -38,72 +29,63 @@ local function UpdateBar()
         bar:SetMinMaxValues(0, maxRep)
         bar:SetValue(curRep)
         bar:SetStatusBarColor(color.r, color.g, color.b)
-        
         bar.text:SetText(format("%s: %s / %s (%d%%)", name, FormatNum(curRep), FormatNum(maxRep), math.floor((curRep / maxRep) * 100)))
         bar.isRep = true
     elseif not isMaxLevel then
         bar:Show()
-        local currXP = UnitXP("player")
-        local maxXP = UnitXPMax("player")
-        local restedXP = GetXPExhaustion()
+        local cur, maxVal = UnitXP("player"), UnitXPMax("player")
+        bar:SetMinMaxValues(0, maxVal)
+        bar:SetValue(cur)
+        if GetXPExhaustion() then bar:SetStatusBarColor(0.0, 0.39, 0.88) else bar:SetStatusBarColor(0.58, 0.0, 0.55) end
         
-        bar:SetMinMaxValues(0, maxXP)
-        bar:SetValue(currXP)
-        
-        if restedXP and restedXP > 0 then
-            bar:SetStatusBarColor(0.0, 0.39, 0.88)
-        else
-            bar:SetStatusBarColor(0.58, 0.0, 0.55)
-        end
-
-        bar.text:SetText(format("%s / %s (%d%%)", FormatNum(currXP), FormatNum(maxXP), math.floor((currXP / maxXP) * 100)))
+        bar.text:SetText(format("%s / %s (%d%%)", FormatNum(cur), FormatNum(maxVal), math.floor((cur / maxVal) * 100)))
         bar.isRep = false
-    else
-        bar:Hide()
+    else 
+        bar:Hide() 
     end
 end
 
 local function CreateBar()
+    if bar then return end 
+
     bar = CreateFrame("StatusBar", "CleanUIExpBar", UIParent)
-    bar:SetHeight(10) 
-    
+    bar:SetHeight(10)
     bar:SetPoint("TOPLEFT", ActionButton1, "BOTTOMLEFT", 0, -4)
     bar:SetPoint("TOPRIGHT", ActionButton12, "BOTTOMRIGHT", 0, -4)
-    
     bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
     
     local bg = bar:CreateTexture(nil, "BACKGROUND")
-    bg:SetPoint("TOPLEFT", -1, 1)
-    bg:SetPoint("BOTTOMRIGHT", 1, -1)
-    bg:SetTexture(0, 0, 0, 1)
+    bg:SetPoint("TOPLEFT", -1, 1); bg:SetPoint("BOTTOMRIGHT", 1, -1)
+    bg:SetTexture(0, 0, 0, 1) 
 
     local innerBg = bar:CreateTexture(nil, "BORDER")
     innerBg:SetAllPoints()
     innerBg:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
-    innerBg:SetVertexColor(0.1, 0.1, 0.1, 0.9)
+    innerBg:SetVertexColor(0, 0, 0, 0.35) 
 
     for i = 1, 9 do
-        local tick = bar:CreateTexture(nil, "OVERLAY")
-        tick:SetTexture(0, 0, 0, 0.6) 
-        tick:SetWidth(1)
-        tick:SetHeight(bar:GetHeight())
-        tick:SetPoint("LEFT", bar, "LEFT", (i * (bar:GetWidth() / 10)), 0)
+        local t = bar:CreateTexture(nil, "OVERLAY")
+        t:SetTexture(0, 0, 0, 1) 
+        t:SetWidth(1)
+        t:SetHeight(10)
+        t:SetPoint("LEFT", bar, "LEFT", (i * (bar:GetWidth() / 10)) - 1, 0)
         
-        local highlight = bar:CreateTexture(nil, "OVERLAY")
-        highlight:SetTexture(1, 1, 1, 0.1)
-        highlight:SetWidth(1)
-        highlight:SetHeight(bar:GetHeight())
-        highlight:SetPoint("LEFT", tick, "RIGHT", 0, 0)
+        local h = bar:CreateTexture(nil, "OVERLAY")
+        h:SetTexture(0.2, 0.2, 0.2, 1) 
+        h:SetWidth(1)
+        h:SetHeight(10)
+        h:SetPoint("LEFT", t, "RIGHT", 0, 0)
     end
 
     bar.text = bar:CreateFontString(nil, "OVERLAY")
-    bar.text:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE") 
-    bar.text:SetPoint("CENTER", bar, "CENTER", 0, 1)
-    
+    bar.text:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
+    bar.text:SetPoint("CENTER", bar, "CENTER", 0, 0)
     bar.text:SetTextColor(1, 1, 0)
+    bar.text:SetAlpha(0)
 
     bar:EnableMouse(true)
     bar:SetScript("OnEnter", function(self)
+        self.text:SetAlpha(1)
         GameTooltip:SetOwner(self, "ANCHOR_TOP")
         if self.isRep then
             local name, standing, min, max, value = GetWatchedFactionInfo()
@@ -121,7 +103,10 @@ local function CreateBar()
         end
         GameTooltip:Show()
     end)
-    bar:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    bar:SetScript("OnLeave", function(self)
+        self.text:SetAlpha(0)
+        GameTooltip:Hide()
+    end)
 
     UpdateBar()
 end
@@ -129,7 +114,8 @@ end
 F:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then
         if ActionButton1 then CreateBar() else C_Timer.After(0.1, CreateBar) end
-    else
         UpdateBar()
+    else 
+        UpdateBar() 
     end
 end)
