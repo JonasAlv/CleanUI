@@ -7,79 +7,70 @@ Hider:Hide()
 
 local function SkinButton(btn)
     if not btn then return end
-    
-    local icon = _G[btn:GetName().."Icon"]
+    local name = btn:GetName()
+    local icon = _G[name.."Icon"]
+    local nt = btn:GetNormalTexture()
+    local flash = _G[name.."Flash"]
+    local hotkey = _G[name.."HotKey"]
+
     if icon then 
         icon:ClearAllPoints()
         icon:SetAllPoints(btn)
         icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) 
     end
     
-    local nt = btn:GetNormalTexture()
-    if nt then nt:SetAlpha(0) end
-    if _G[btn:GetName().."Border"] then _G[btn:GetName().."Border"]:SetAlpha(0) end
-    
-    if not btn.cleanUIBorder then
-        local border = btn:CreateTexture(nil, "BACKGROUND")
-        border:SetPoint("TOPLEFT", btn, "TOPLEFT", -1, 1)
-        border:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", 1, -1)
-        border:SetTexture(0, 0, 0, 1) 
-        btn.cleanUIBorder = border
+    if nt then 
+        nt:SetAlpha(1) 
     end
+
+    if flash then flash:SetTexture(nil) end
+    if btn.SetPushedTexture then btn:SetPushedTexture(nil) end
     
-    local ct = btn:GetCheckedTexture()
-    if ct then 
-        ct:SetTexture("Interface\\Buttons\\CheckButtonHilight")
-        ct:SetBlendMode("ADD")
-        ct:ClearAllPoints()
-        ct:SetAllPoints(btn)
+    if hotkey then
+        hotkey:SetFont("Fonts\\ARIALN.TTF", 12, "OUTLINE")
     end
-    
-    local ht = btn:GetHighlightTexture()
-    if ht then
-        ht:SetTexture("Interface\\Buttons\\ButtonHilight-Square")
-        ht:SetBlendMode("ADD")
-        ht:ClearAllPoints()
-        ht:SetAllPoints(btn)
-    end
+
+    local border = _G[name.."Border"]
+    if border then border:SetAlpha(0) end 
 end
 
-local function EnforceBarPositions()
-    if InCombatLockdown() then return end
+local isLocking = false
+
+local function ApplySelectiveLockdown()
+    if InCombatLockdown() or isLocking then return end
+    isLocking = true
+
+    MainMenuBar:ClearAllPoints()
+    MainMenuBar:SetPoint("BOTTOM", UIParent, "BOTTOM", 255, 15)
     
-    if MainMenuBar then
-        MainMenuBar:ClearAllPoints()
-        MainMenuBar:SetPoint("BOTTOM", UIParent, "BOTTOM", 230, 15) 
+    if MainMenuBar.SetPoint ~= (function() end) then
+        MainMenuBar.ClearAllPoints = function() end
+        MainMenuBar.SetPoint = function() end
+    end
+
+    if MultiBarBottomLeft then
+        MultiBarBottomLeft:ClearAllPoints()
+        MultiBarBottomLeft:SetPoint("BOTTOMLEFT", ActionButton1, "TOPLEFT", 0, 2)
     end
     
-    if MultiBarBottomLeftButton1 and ActionButton1 then
-        MultiBarBottomLeftButton1:ClearAllPoints()
-        MultiBarBottomLeftButton1:SetPoint("BOTTOMLEFT", ActionButton1, "TOPLEFT", 0, 2)
+    if MultiBarBottomRight then
+        MultiBarBottomRight:ClearAllPoints()
+        MultiBarBottomRight:SetPoint("BOTTOMLEFT", MultiBarBottomLeft, "TOPLEFT", 0, 2)
     end
-    
-    if MultiBarBottomRightButton1 and MultiBarBottomLeftButton1 then
-        MultiBarBottomRightButton1:ClearAllPoints()
-        MultiBarBottomRightButton1:SetPoint("BOTTOMLEFT", MultiBarBottomLeftButton1, "TOPLEFT", 0, 2)
-    end
+
+    isLocking = false
 end
 
 local function ApplyCleanSkin()
-    MainMenuBar.ignoreFramePositionManager = true
-    
-    local framesToDisable = {
+    local framesToHide = {
         MainMenuBarOverlayFrame, MainMenuBarMaxLevelBar,
         MainMenuExpBar, ReputationWatchBar, MainMenuBarPerformanceBarFrame,
         CharacterMicroButton, SpellbookMicroButton, TalentMicroButton, QuestLogMicroButton, 
         SocialsMicroButton, WorldMapMicroButton, MainMenuMicroButton, HelpMicroButton,
         MainMenuBarBackpackButton, CharacterBag0Slot, CharacterBag1Slot, CharacterBag2Slot, CharacterBag3Slot, KeyRingButton
     }
-    
-    for _, frame in ipairs(framesToDisable) do
-        if frame then 
-            frame:SetParent(Hider) 
-            frame:SetAlpha(0)
-            if frame.EnableMouse then frame:EnableMouse(false) end 
-        end
+    for _, f in ipairs(framesToHide) do
+        if f then f:SetParent(Hider) end
     end
 
     local texturesToHide = {
@@ -94,19 +85,18 @@ local function ApplyCleanSkin()
 
     for i = 1, 12 do
         SkinButton(_G["ActionButton"..i])
-        SkinButton(_G["BonusActionButton"..i])
         SkinButton(_G["MultiBarBottomLeftButton"..i])
         SkinButton(_G["MultiBarBottomRightButton"..i])
     end
-
-    EnforceBarPositions()
+    
+    ApplySelectiveLockdown()
 end
 
-F:SetScript("OnEvent", function(self, event) 
-    if event == "PLAYER_ENTERING_WORLD" then 
-        ApplyCleanSkin() 
-    end 
+F:SetScript("OnEvent", function(self, event)
+    if event == "PLAYER_ENTERING_WORLD" then
+        ApplyCleanSkin()
+    end
 end)
 
-hooksecurefunc("UIParent_ManageFramePositions", EnforceBarPositions)
-hooksecurefunc("MultiActionBar_Update", EnforceBarPositions)
+hooksecurefunc("UIParent_ManageFramePositions", ApplySelectiveLockdown)
+hooksecurefunc("MultiActionBar_Update", ApplySelectiveLockdown)
