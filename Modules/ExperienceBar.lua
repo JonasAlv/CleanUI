@@ -10,22 +10,6 @@ Hider:Hide()
 
 local xpBar
 
-local function RedirectClickToAnchor(self, button)
-    if button == "LeftButton" and IsShiftKeyDown() and IsControlKeyDown() then
-        local anchor = CleanUIActionBarAnchor
-        if anchor and anchor:GetScript("OnMouseDown") then
-            anchor:GetScript("OnMouseDown")(anchor, button)
-        end
-    end
-end
-
-local function RedirectReleaseToAnchor(self, button)
-    local anchor = CleanUIActionBarAnchor
-    if anchor and anchor.isCleanUIMoving and anchor:GetScript("OnMouseUp") then
-        anchor:GetScript("OnMouseUp")(anchor, button)
-    end
-end
-
 local function UpdateXP()
     if not xpBar then return end
     
@@ -54,12 +38,12 @@ local function UpdateXP()
 end
 
 local function CreateXPBar()
-    if not CleanUIActionBarAnchor then return end
-
-    xpBar = CreateFrame("StatusBar", "CleanUIExperienceBar", CleanUIActionBarAnchor)
+    xpBar = CreateFrame("StatusBar", "CleanUIExperienceBar", UIParent)
     xpBar:SetHeight(8)
-    xpBar:SetPoint("BOTTOMLEFT", CleanUIActionBarAnchor, "BOTTOMLEFT", 0, 2)
-    xpBar:SetPoint("BOTTOMRIGHT", CleanUIActionBarAnchor, "BOTTOMRIGHT", 0, 2)
+    
+    xpBar:SetPoint("TOPLEFT", ActionButton1, "BOTTOMLEFT", 0, -4)
+    xpBar:SetPoint("TOPRIGHT", ActionButton12, "BOTTOMRIGHT", 0, -4)
+    
     xpBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
     
     local bg = xpBar:CreateTexture(nil, "BACKGROUND")
@@ -67,6 +51,7 @@ local function CreateXPBar()
     bg:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
     bg:SetVertexColor(0, 0, 0, 0.6)
 
+    -- 1px Black Borders
     local t = xpBar:CreateTexture(nil, "OVERLAY"); t:SetTexture(0, 0, 0, 1); t:SetPoint("TOPLEFT", -1, 1); t:SetPoint("TOPRIGHT", 1, 1); t:SetHeight(1)
     local b = xpBar:CreateTexture(nil, "OVERLAY"); b:SetTexture(0, 0, 0, 1); b:SetPoint("BOTTOMLEFT", -1, -1); b:SetPoint("BOTTOMRIGHT", 1, -1); b:SetHeight(1)
     local l = xpBar:CreateTexture(nil, "OVERLAY"); l:SetTexture(0, 0, 0, 1); l:SetPoint("TOPLEFT", -1, 1); l:SetPoint("BOTTOMLEFT", -1, -1); l:SetWidth(1)
@@ -77,9 +62,7 @@ local function CreateXPBar()
     xpBar.text:SetPoint("CENTER", xpBar, "CENTER", 0, 0)
 
     xpBar:EnableMouse(true)
-    xpBar:HookScript("OnMouseDown", RedirectClickToAnchor)
-    xpBar:HookScript("OnMouseUp", RedirectReleaseToAnchor)
-
+    
     xpBar:SetScript("OnEnter", function(self)
         local curr, max = UnitXP("player"), UnitXPMax("player")
         local rested = GetXPExhaustion()
@@ -106,7 +89,11 @@ end
 
 F:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then
-        CreateXPBar()
+        if ActionButton1 then
+            CreateXPBar()
+        else
+            C_Timer.After(0.5, CreateXPBar)
+        end
     else
         UpdateXP()
     end
