@@ -1,13 +1,7 @@
 local _, UI = ...
-local MAX_LEVELS = { [0] = 60, [1] = 70, [2] = 80 }
 
+local EXPANSION_MAX_LEVEL = ({ [0] = 60, [1] = 70, [2] = 80 })[GetExpansionLevel()] or 80
 local F = CreateFrame("Frame")
-F:RegisterEvent("PLAYER_ENTERING_WORLD")
-F:RegisterEvent("PLAYER_XP_UPDATE")
-F:RegisterEvent("PLAYER_LEVEL_UP")
-F:RegisterEvent("UPDATE_EXHAUSTION")
-F:RegisterEvent("UPDATE_FACTION")
-
 local bar
 
 local function FormatNum(val)
@@ -16,42 +10,71 @@ local function FormatNum(val)
     else return tostring(val) end
 end
 
+local function LobotomizeDefaultBars()
+    local framesToKill = {
+        MainMenuExpBar, MainMenuBarMaxLevelBar,
+        ReputationWatchBar, ReputationWatchStatusBar,
+        ExhaustionTick, ExhaustionLevelIndicator
+    }
+    for _, frame in ipairs(framesToKill) do
+        if frame then
+            frame:UnregisterAllEvents()
+            frame:Hide()
+            if CleanUIHider then frame:SetParent(CleanUIHider) end 
+            if frame.EnableMouse then frame:EnableMouse(false) end
+            if frame.SetScript then
+                frame:SetScript("OnEnter", nil)
+                frame:SetScript("OnLeave", nil)
+            end
+        end
+    end
+end
+
 local function UpdateBar()
     if not bar then return end
-    local name, standing, min, max, value = GetWatchedFactionInfo()
-    local maxLevel = MAX_LEVELS[GetExpansionLevel()] or 80
-    local isMaxLevel = UnitLevel("player") == maxLevel
+    
+    local repName, repStanding, repMin, repMax, repValue = GetWatchedFactionInfo()
+    local isMaxLevel = (UnitLevel("player") == EXPANSION_MAX_LEVEL)
 
-    if name and (isMaxLevel or IsShiftKeyDown()) then
+    if repName and (isMaxLevel or IsShiftKeyDown()) then
         bar:Show()
-        local color = FACTION_BAR_COLORS[standing]
-        local curRep, maxRep = value - min, max - min
+        bar.isRep = true
+        
+        local color = FACTION_BAR_COLORS[repStanding]
+        local curRep, maxRep = repValue - repMin, repMax - repMin
+        
         bar:SetMinMaxValues(0, maxRep)
         bar:SetValue(curRep)
         bar:SetStatusBarColor(color.r, color.g, color.b)
-        bar.text:SetText(format("%s: %s / %s (%d%%)", name, FormatNum(curRep), FormatNum(maxRep), math.floor((curRep / maxRep) * 100)))
-        bar.isRep = true
+        bar.text:SetText(format("%s: %s / %s (%d%%)", repName, FormatNum(curRep), FormatNum(maxRep), math.floor((curRep / maxRep) * 100)))
+
     elseif not isMaxLevel then
         bar:Show()
-        local cur, maxVal = UnitXP("player"), UnitXPMax("player")
-        bar:SetMinMaxValues(0, maxVal)
-        bar:SetValue(cur)
-        if GetXPExhaustion() then bar:SetStatusBarColor(0.0, 0.39, 0.88) else bar:SetStatusBarColor(0.58, 0.0, 0.55) end
-        
-        bar.text:SetText(format("%s / %s (%d%%)", FormatNum(cur), FormatNum(maxVal), math.floor((cur / maxVal) * 100)))
         bar.isRep = false
+        
+        local curXP, maxXP = UnitXP("player"), UnitXPMax("player")
+        
+        bar:SetMinMaxValues(0, maxXP)
+        bar:SetValue(curXP)
+        if GetXPExhaustion() then 
+            bar:SetStatusBarColor(0.0, 0.39, 0.88) -- Rested Blue
+        else 
+            bar:SetStatusBarColor(0.58, 0.0, 0.55) -- Normal Purple
+        end
+        bar.text:SetText(format("%s / %s (%d%%)", FormatNum(curXP), FormatNum(maxXP), math.floor((curXP / maxXP) * 100)))
+
     else 
         bar:Hide() 
     end
 end
 
 local function CreateBar()
-    if bar then return end 
-
     bar = CreateFrame("StatusBar", "CleanUIExpBar", UIParent)
     bar:SetHeight(10)
-    bar:SetPoint("TOPLEFT", ActionButton1, "BOTTOMLEFT", 0, -4)
-    bar:SetPoint("TOPRIGHT", ActionButton12, "BOTTOMRIGHT", 0, -4)
+    
+    local anchorFrame = ActionButton1 or MainMenuBar
+    bar:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -4)
+    bar:SetPoint("TOPRIGHT", _G["ActionButton12"] or anchorFrame, "BOTTOMRIGHT", 0, -4)
     bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
     
     local bg = bar:CreateTexture(nil, "BACKGROUND")
@@ -107,15 +130,18 @@ local function CreateBar()
         self.text:SetAlpha(0)
         GameTooltip:Hide()
     end)
-
-    UpdateBar()
 end
+
+F:RegisterEvent("PLAYER_ENTERING_WORLD")
+F:RegisterEvent("PLAYER_XP_UPDATE")
+F:RegisterEvent("PLAYER_LEVEL_UP")
+F:RegisterEvent("UPDATE_EXHAUSTION")
+F:RegisterEvent("UPDATE_FACTION")
 
 F:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then
-        if ActionButton1 then CreateBar() else C_Timer.After(0.1, CreateBar) end
-        UpdateBar()
-    else 
-        UpdateBar() 
+        LobotomizeDefaultBars()
+        if not bar then CreateBar() end
     end
+    UpdateBar()
 end)

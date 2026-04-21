@@ -34,17 +34,21 @@ local function ApplySelectiveLockdown()
     MainMenuBar:ClearAllPoints()
     MainMenuBar:SetPoint("BOTTOM", UIParent, "BOTTOM", 255, 15)
     
-    if MainMenuBar.SetPoint ~= (function() end) then
+    if not MainMenuBar.isLobotomized then
         MainMenuBar.ClearAllPoints = function() end
         MainMenuBar.SetPoint = function() end
+        MainMenuBar.isLobotomized = true
     end
 
     if MultiBarBottomLeft then
         MultiBarBottomLeft:ClearAllPoints()
         MultiBarBottomLeft:SetPoint("BOTTOMLEFT", ActionButton1, "TOPLEFT", 0, 2)
         
-        MultiBarBottomLeft.ClearAllPoints = function() end
-        MultiBarBottomLeft.SetPoint = function() end
+        if not MultiBarBottomLeft.isLobotomized then
+            MultiBarBottomLeft.ClearAllPoints = function() end
+            MultiBarBottomLeft.SetPoint = function() end
+            MultiBarBottomLeft.isLobotomized = true
+        end
     end
     
     if MultiBarBottomRight then

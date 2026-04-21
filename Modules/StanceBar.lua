@@ -1,172 +1,126 @@
 local _, UI = ...
 local F = CreateFrame("Frame")
-
 F:RegisterEvent("PLAYER_ENTERING_WORLD")
-F:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
-F:RegisterEvent("UPDATE_SHAPESHIFT_FORM") 
-F:RegisterEvent("UPDATE_SHAPESHIFT_USABLE")
-F:RegisterEvent("SPELL_UPDATE_COOLDOWN")
-F:RegisterEvent("PLAYER_AURAS_CHANGED")
 
 local Hider = CreateFrame("Frame", "CleanUIStanceHider", UIParent)
 Hider:Hide()
 
-local CustomStanceButtons = {}
-
-local function SkinButton(btn)
+local function SkinNativeStanceButton(btn)
     if not btn then return end
-    
-    local icon = _G[btn:GetName().."Icon"]
-    if icon then 
-        icon:ClearAllPoints()
-        icon:SetAllPoints(btn)
-        icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) 
-    end
-    
+    local name = btn:GetName()
     local nt = btn:GetNormalTexture()
-    if nt then nt:SetAlpha(0) end
-    if _G[btn:GetName().."Border"] then _G[btn:GetName().."Border"]:SetAlpha(0) end
+    local border = _G[name.."Border"]
+    local icon = _G[name.."Icon"]
     
-    if not btn.cleanUIBorder then
-        local border = btn:CreateTexture(nil, "BACKGROUND")
-        border:SetPoint("TOPLEFT", btn, "TOPLEFT", -1, 2)
-        border:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", 1, -1)
-        border:SetTexture(0, 0, 0, 1) 
-        btn.cleanUIBorder = border
-    end
+    if nt then nt:SetAlpha(1) end
+    if border then border:SetAlpha(1) end
+    if icon then icon:SetTexCoord(0, 1, 0, 1) end
     
-    local ct = btn:GetCheckedTexture()
-    if ct then 
-        ct:SetTexture("Interface\\Buttons\\CheckButtonHilight")
-        ct:SetBlendMode("ADD")
-        ct:ClearAllPoints()
-        ct:SetAllPoints(btn)
-    end
-    
-    local ht = btn:GetHighlightTexture()
-    if ht then
-        ht:SetTexture("Interface\\Buttons\\ButtonHilight-Square")
-        ht:SetBlendMode("ADD")
-        ht:ClearAllPoints()
-        ht:SetAllPoints(btn)
+    if btn.cleanUIBorder then
+        btn.cleanUIBorder:Hide()
+        btn.cleanUIBorder:SetAlpha(0)
     end
 end
 
-local function EnforceStancePosition()
-    local anchor = CleanUIStanceBarAnchor
-    if not anchor or InCombatLockdown() then return end
+local isLocking = false
+
+local function ApplyStanceBarLockdown()
+    if InCombatLockdown() or isLocking then return end
+    isLocking = true
     
+    local anchor = _G["CleanUIStanceBarAnchor"]
+    if not anchor then
+        isLocking = false
+        return
+    end
+
     if not CleanUIPositions or not CleanUIPositions["StanceBarAnchor"] then
         anchor:ClearAllPoints()
+        
         local floorButton
-        if MultiBarBottomRight:IsShown() then
+        if MultiBarBottomRight and MultiBarBottomRight:IsShown() then
             floorButton = MultiBarBottomRightButton1
-        elseif MultiBarBottomLeft:IsShown() then
+        elseif MultiBarBottomLeft and MultiBarBottomLeft:IsShown() then
             floorButton = MultiBarBottomLeftButton1
         else
             floorButton = ActionButton1
         end
         
         if floorButton then
-            anchor:SetPoint("BOTTOMLEFT", floorButton, "TOPLEFT", 0, 10)
+            anchor:SetPoint("BOTTOMLEFT", floorButton, "TOPLEFT", 0, 4)
         else
             anchor:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 10, 110)
         end
     end
-end
 
-local function UpdateStanceButtons()
-    if InCombatLockdown() then return end 
+    ShapeshiftButton1:ClearAllPoints()
+    ShapeshiftButton1:SetPoint("BOTTOMLEFT", anchor, "BOTTOMLEFT", 0, 0)
     
-    local numForms = GetNumShapeshiftForms()
-    
-    for i = 1, 10 do
-        local btn = CustomStanceButtons[i]
-        if not btn then break end
-        
-        if i <= numForms then
-            local texture, name, isActive, isCastable = GetShapeshiftFormInfo(i)
-            local icon = _G[btn:GetName().."Icon"]
-            local cooldown = _G[btn:GetName().."Cooldown"]
-            
-            if icon then 
-                icon:SetTexture(texture)
-                if isCastable then 
-                    icon:SetVertexColor(1, 1, 1) 
-                else 
-                    icon:SetVertexColor(0.4, 0.4, 0.4) 
-                end
-            end
-            
-            btn:SetChecked(isActive and true or false)
-            
-            if cooldown then
-                local start, duration, enable = GetShapeshiftFormCooldown(i)
-                CooldownFrame_SetTimer(cooldown, start, duration, enable)
-            end
-            
-            btn:Show()
-        else
-            btn:Hide()
+    for i = 2, 10 do
+        local btn = _G["ShapeshiftButton"..i]
+        if btn then
+            btn:ClearAllPoints()
+            btn:SetPoint("LEFT", _G["ShapeshiftButton"..(i-1)], "RIGHT", 4, 0)
         end
     end
+
+    if ShapeshiftButton1.SetPoint ~= (function() end) then
+        for i = 1, 10 do
+            local b = _G["ShapeshiftButton"..i]
+            if b then
+                b.ClearAllPoints = function() end
+                b.SetPoint = function() end
+            end
+        end
+    end
+
+    isLocking = false
 end
 
-local function ApplyStanceBarSkin()
-    local stanceAnchor = _G["CleanUIStanceBarAnchor"] or CreateFrame("Frame", "CleanUIStanceBarAnchor", UIParent, "SecureHandlerStateTemplate")
-    stanceAnchor:SetSize(300, 35) 
-    stanceAnchor:SetClampedToScreen(true)
+local function InitStanceBar()
+    local anchor = _G["CleanUIStanceBarAnchor"] or CreateFrame("Frame", "CleanUIStanceBarAnchor", UIParent)
+    anchor:SetSize(30, 30)
     
     if UI.MakeMovableAndSave then 
-        UI.MakeMovableAndSave(stanceAnchor, "StanceBarAnchor") 
-    end
-    
-    if ShapeshiftBarFrame then 
-        ShapeshiftBarFrame:UnregisterAllEvents()
-        ShapeshiftBarFrame:SetParent(Hider) 
+        UI.MakeMovableAndSave(anchor, "StanceBarAnchor") 
     end
 
     for i = 1, 10 do
-        local btn = CreateFrame("CheckButton", "CleanUIStanceButton"..i, stanceAnchor, "ShapeshiftButtonTemplate")
-        btn:SetID(i) 
-        btn:SetFrameLevel(5) 
-        
-        if i == 1 then
-            btn:SetPoint("BOTTOMLEFT", stanceAnchor, "BOTTOMLEFT", 0, 0)
-        else
-            btn:SetPoint("LEFT", CustomStanceButtons[i-1], "RIGHT", 6, 0)
+        local btn = _G["ShapeshiftButton"..i]
+        if btn then
+            btn:SetParent(anchor) 
+            SkinNativeStanceButton(btn)
         end
-        
-        SkinButton(btn)
-        
-        btn:HookScript("OnMouseDown", function(self, button)
-            if IsShiftKeyDown() and IsControlKeyDown() then
-                local script = stanceAnchor:GetScript("OnMouseDown")
-                if script then script(stanceAnchor, button) end
-            end
-        end)
-        btn:HookScript("OnMouseUp", function(self, button)
-            if stanceAnchor.isCleanUIMoving then
-                local script = stanceAnchor:GetScript("OnMouseUp")
-                if script then script(stanceAnchor, button) end
-            end
-        end)
-        
-        CustomStanceButtons[i] = btn
+    end
+
+    if ShapeshiftBarFrame then
+        ShapeshiftBarFrame:SetParent(Hider)
     end
     
-    RegisterStateDriver(stanceAnchor, "visibility", "[bonusbar:5] hide; show")
-    EnforceStancePosition()
-    UpdateStanceButtons()
+    local texturesToHide = {
+        ShapeshiftBarLeft, ShapeshiftBarMiddle, ShapeshiftBarRight
+    }
+    for _, tex in ipairs(texturesToHide) do
+        if tex then tex:Hide(); tex:SetAlpha(0) end
+    end
+
+    ApplyStanceBarLockdown()
 end
 
 F:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then 
-        ApplyStanceBarSkin() 
-    else
-        UpdateStanceButtons()
+        InitStanceBar() 
     end
 end)
 
-hooksecurefunc("MultiActionBar_Update", EnforceStancePosition)
-hooksecurefunc("UIParent_ManageFramePositions", EnforceStancePosition)
+if MultiBarBottomLeft then
+    MultiBarBottomLeft:HookScript("OnShow", ApplyStanceBarLockdown)
+    MultiBarBottomLeft:HookScript("OnHide", ApplyStanceBarLockdown)
+end
+if MultiBarBottomRight then
+    MultiBarBottomRight:HookScript("OnShow", ApplyStanceBarLockdown)
+    MultiBarBottomRight:HookScript("OnHide", ApplyStanceBarLockdown)
+end
+
+hooksecurefunc("UIParent_ManageFramePositions", ApplyStanceBarLockdown)
+hooksecurefunc("ShapeshiftBar_Update", ApplyStanceBarLockdown)
