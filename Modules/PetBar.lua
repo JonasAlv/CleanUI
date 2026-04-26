@@ -89,6 +89,12 @@ end
 
 F:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then
+        if UI.HaltModules then 
+            self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+            return 
+        end
+
         ApplyPetBarSkin()
+        self:UnregisterEvent("PLAYER_ENTERING_WORLD")
     end
 end)

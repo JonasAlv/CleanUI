@@ -6,6 +6,8 @@ local Setup = CreateFrame("Frame")
 Setup:RegisterEvent("PLAYER_LOGIN")
 Setup:SetScript("OnEvent", function()
     if CleanUI_UseClassPortraits == nil then CleanUI_UseClassPortraits = true end
+    
+    CleanUIPositions = CleanUIPositions or {}
 
     if TargetFrameToTHealthBar then UI.ProtectFrame(TargetFrameToTHealthBar) end
     if FocusFrameToTHealthBar then UI.ProtectFrame(FocusFrameToTHealthBar) end
@@ -16,11 +18,11 @@ SlashCmdList["CLEANUI"] = function(msg)
     msg = msg:lower()
     
     if msg == "reset" then
+        local isMinimalist = CleanUIPositions and CleanUIPositions.MinimalistMode
+        
         CleanUIPositions = {} 
         
-        if UI.ForceTwoBarLayout then
-            UI.ForceTwoBarLayout(true) 
-        end
+        CleanUIPositions.MinimalistMode = isMinimalist
 
         local frames = {
             PlayerFrame, TargetFrame, FocusFrame, PetFrame, 
@@ -30,7 +32,8 @@ SlashCmdList["CLEANUI"] = function(msg)
             CleanUIPartyAnchor,
             CleanUIPetBarAnchor,
             CleanUIStanceBarAnchor,
-            CleanUIMicroMenuAnchor      
+            CleanUIMicroMenuAnchor,
+            CleanUIBagBarAnchor,
         }
         
         for i = 1, 4 do
@@ -40,13 +43,13 @@ SlashCmdList["CLEANUI"] = function(msg)
 
         for _, f in pairs(frames) do 
             if f then 
-                f:SetMovable(true)
+                if f.SetMovable then f:SetMovable(true) end
                 f:SetUserPlaced(false) 
                 f:ClearAllPoints()     
             end 
         end
 
-        print("|cff00ff00CleanUI:|r Positions and Bars reset to defaults. Reloading...")
+        print("|cff00ff00CleanUI:|r Positions reset (Settings Preserved). Reloading...")
         ReloadUI()
 
     elseif msg:find("loot") and msg:find("test") then

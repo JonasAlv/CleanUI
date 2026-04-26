@@ -25,7 +25,7 @@ end
 local isLocking = false
 
 local function ApplyStanceBarLockdown()
-    if InCombatLockdown() or isLocking then return end
+    if UI.HaltModules or InCombatLockdown() or isLocking then return end
     isLocking = true
     
     local anchor = _G["CleanUIStanceBarAnchor"]
@@ -109,6 +109,11 @@ end
 
 F:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then 
+        if UI.HaltModules then 
+            self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+            return 
+        end
+        
         InitStanceBar() 
     end
 end)

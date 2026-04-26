@@ -1,6 +1,6 @@
 local _, UI = ...
 
-local EXPANSION_MAX_LEVEL = ({ [0] = 60, [1] = 70, [2] = 80 })[GetExpansionLevel()] or 80
+local MAX_LEVEL = MAX_PLAYER_LEVEL or 80
 local F = CreateFrame("Frame")
 local bar
 
@@ -22,19 +22,16 @@ local function LobotomizeDefaultBars()
             frame:Hide()
             if CleanUIHider then frame:SetParent(CleanUIHider) end 
             if frame.EnableMouse then frame:EnableMouse(false) end
-            if frame.SetScript then
-                frame:SetScript("OnEnter", nil)
-                frame:SetScript("OnLeave", nil)
-            end
         end
     end
 end
 
 local function UpdateBar()
-    if not bar then return end
+    if not bar or UI.HaltModules then return end
     
     local repName, repStanding, repMin, repMax, repValue = GetWatchedFactionInfo()
-    local isMaxLevel = (UnitLevel("player") == EXPANSION_MAX_LEVEL)
+    local playerLevel = UnitLevel("player")
+    local isMaxLevel = (playerLevel >= MAX_LEVEL)
 
     if repName and (isMaxLevel or IsShiftKeyDown()) then
         bar:Show()
@@ -43,6 +40,8 @@ local function UpdateBar()
         local color = FACTION_BAR_COLORS[repStanding]
         local curRep, maxRep = repValue - repMin, repMax - repMin
         
+        if maxRep <= 0 then maxRep = 1 curRep = 1 end
+
         bar:SetMinMaxValues(0, maxRep)
         bar:SetValue(curRep)
         bar:SetStatusBarColor(color.r, color.g, color.b)
@@ -53,13 +52,15 @@ local function UpdateBar()
         bar.isRep = false
         
         local curXP, maxXP = UnitXP("player"), UnitXPMax("player")
-        
+        if maxXP <= 0 then maxXP = 1 end
+
         bar:SetMinMaxValues(0, maxXP)
         bar:SetValue(curXP)
+        
         if GetXPExhaustion() then 
-            bar:SetStatusBarColor(0.0, 0.39, 0.88) -- Rested Blue
+            bar:SetStatusBarColor(0.0, 0.39, 0.88)
         else 
-            bar:SetStatusBarColor(0.58, 0.0, 0.55) -- Normal Purple
+            bar:SetStatusBarColor(0.58, 0.0, 0.55)
         end
         bar.text:SetText(format("%s / %s (%d%%)", FormatNum(curXP), FormatNum(maxXP), math.floor((curXP / maxXP) * 100)))
 
@@ -86,18 +87,13 @@ local function CreateBar()
     innerBg:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
     innerBg:SetVertexColor(0, 0, 0, 0.35) 
 
+    local barWidth = bar:GetWidth()
     for i = 1, 9 do
         local t = bar:CreateTexture(nil, "OVERLAY")
         t:SetTexture(0, 0, 0, 1) 
         t:SetWidth(1)
         t:SetHeight(10)
-        t:SetPoint("LEFT", bar, "LEFT", (i * (bar:GetWidth() / 10)) - 1, 0)
-        
-        local h = bar:CreateTexture(nil, "OVERLAY")
-        h:SetTexture(0.2, 0.2, 0.2, 1) 
-        h:SetWidth(1)
-        h:SetHeight(10)
-        h:SetPoint("LEFT", t, "RIGHT", 0, 0)
+        t:SetPoint("LEFT", bar, "LEFT", (i * (490 / 10)), 0)
     end
 
     bar.text = bar:CreateFontString(nil, "OVERLAY")
@@ -139,6 +135,8 @@ F:RegisterEvent("UPDATE_EXHAUSTION")
 F:RegisterEvent("UPDATE_FACTION")
 
 F:SetScript("OnEvent", function(self, event)
+    if UI.HaltModules then return end
+
     if event == "PLAYER_ENTERING_WORLD" then
         LobotomizeDefaultBars()
         if not bar then CreateBar() end

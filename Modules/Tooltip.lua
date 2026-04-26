@@ -1,11 +1,13 @@
 local _, UI = ...
 
 hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
-    tooltip:SetOwner(parent, "ANCHOR_NONE")
-    
-    if MainMenuBarBackpackButton then
-        tooltip:SetPoint("BOTTOMRIGHT", MainMenuBarBackpackButton, "TOPRIGHT", -15, 20)
+    local isMinimalist = CleanUIPositions and CleanUIPositions.MinimalistMode
+
+    if isMinimalist then
+        tooltip:SetOwner(parent, "ANCHOR_NONE")
+        tooltip:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -25, 25)
     else
+        tooltip:SetOwner(parent, "ANCHOR_NONE")
         tooltip:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -25, 120)
     end
 end)
@@ -55,21 +57,16 @@ local ErrorGatekeeper = CreateFrame("Frame")
 ErrorGatekeeper:RegisterEvent("UI_ERROR_MESSAGE")
 
 ErrorGatekeeper:SetScript("OnEvent", function(self, event, msg)
-    if not msg then return end
-    
-    if InCombatLockdown() then return end
-    
+    if not msg or InCombatLockdown() then return end
     UIErrorsFrame:AddMessage(msg, 1.0, 0.1, 0.1, 1.0)
 end)
 
 local CombatWatch = CreateFrame("Frame")
 CombatWatch:RegisterEvent("PLAYER_REGEN_DISABLED")
 CombatWatch:SetScript("OnEvent", function()
-
     if GameTooltip:IsShown() then 
         local hasItem = GameTooltip:GetItem()
         local hasSpell = GameTooltip:GetSpell()
-        
         local owner = GameTooltip:GetOwner()
         local ownerName = owner and owner:GetName() or ""
         local isAura = ownerName:find("Buff") or ownerName:find("Debuff")

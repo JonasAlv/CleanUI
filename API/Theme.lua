@@ -53,7 +53,6 @@ ThemeWatcher:SetScript("OnEvent", function(self, event, unit)
     end
 end)
 
--- Fix for Healthbar flashing bug, Do Not Touch unless you know exactly why this is here and what it does.
 function UI.ProtectFrame(healthBar)
     if not healthBar or healthBar.hooked then return end
     
