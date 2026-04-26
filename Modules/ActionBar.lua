@@ -62,8 +62,22 @@ local function ApplySelectiveLockdown()
         MainMenuBarPageNumber:SetParent(MainMenuBar)
         MainMenuBarPageNumber:ClearAllPoints()
         MainMenuBarPageNumber:SetPoint("LEFT", ActionButton12, "RIGHT", 12, 0)
+        MainMenuBarPageNumber:Show()
     end
 
+    if ActionBarUpButton then
+        ActionBarUpButton:SetParent(MainMenuBar)
+        ActionBarUpButton:ClearAllPoints()
+        ActionBarUpButton:SetPoint("BOTTOM", MainMenuBarPageNumber, "TOP", 0, 0)
+        ActionBarUpButton:Show()
+    end
+
+    if ActionBarDownButton then
+        ActionBarDownButton:SetParent(MainMenuBar)
+        ActionBarDownButton:ClearAllPoints()
+        ActionBarDownButton:SetPoint("TOP", MainMenuBarPageNumber, "BOTTOM", 0, -2)
+        ActionBarDownButton:Show()
+    end
     isLocking = false
 end
 
