@@ -20,13 +20,13 @@ end
 
 local function ApplyMicroMenuSkin()
     local menuAnchor = CreateFrame("Frame", "CleanUIMicroMenuAnchor", UIParent)
-    menuAnchor:SetSize(300, 35) 
+    menuAnchor:SetSize(300, 35)
     menuAnchor:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", 0, 0)
     menuAnchor:SetClampedToScreen(true)
     menuAnchor:SetMovable(true)
 
-    if UI.MakeMovableAndSave then 
-        UI.MakeMovableAndSave(menuAnchor, "MicroMenuAnchor") 
+    if UI.MakeMovableAndSave then
+        UI.MakeMovableAndSave(menuAnchor, "MicroMenuAnchor")
     end
 
     local buttonNames = {
@@ -35,7 +35,7 @@ local function ApplyMicroMenuSkin()
         "TalentMicroButton",
         "AchievementMicroButton",
         "QuestLogMicroButton",
-        "SocialsMicroButton",         
+        "SocialsMicroButton",
         "LFDMicroButton",
         "PVPMicroButton",
         "PathToAscensionMicroButton",
@@ -46,18 +46,18 @@ local function ApplyMicroMenuSkin()
 
     local function PositionButtons()
         if InCombatLockdown() then return end
-        
+
         local prev = nil
         local totalWidth = 0
         local spacing = -3
 
         for _, name in ipairs(buttonNames) do
             local btn = _G[name]
-            
+
             if btn and btn:IsShown() then
                 btn:SetParent(menuAnchor)
                 btn:ClearAllPoints()
-                
+
                 if not prev then
                     btn:SetPoint("BOTTOMLEFT", menuAnchor, "BOTTOMLEFT", 0, 0)
                     totalWidth = btn:GetWidth()
@@ -65,15 +65,15 @@ local function ApplyMicroMenuSkin()
                     btn:SetPoint("LEFT", prev, "RIGHT", spacing, 0)
                     totalWidth = totalWidth + (btn:GetWidth() + spacing)
                 end
-                
+
                 if not btn.cleanUIHooked then
                     btn:HookScript("OnMouseDown", RedirectClickToAnchor)
                     btn:HookScript("OnMouseUp", RedirectReleaseToAnchor)
                     btn.cleanUIHooked = true
                 end
-                
+
                 if btn.Flash then btn.Flash:Hide() end
-                
+
                 prev = btn
             end
         end
@@ -85,15 +85,15 @@ local function ApplyMicroMenuSkin()
 
     hooksecurefunc("UpdateMicroButtons", PositionButtons)
     hooksecurefunc("UIParent_ManageFramePositions", PositionButtons)
-    
+
     PositionButtons()
 end
 
 F:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then
-        if UI.HaltModules then 
+        if UI.HaltModules then
             self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-            return 
+            return
         end
 
         ApplyMicroMenuSkin()

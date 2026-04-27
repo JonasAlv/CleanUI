@@ -36,7 +36,7 @@ local function SkinButton(btn)
     local icon = _G[name.."Icon"]
     if icon then icon:SetTexCoord(0, 1, 0, 1) end
     if btn:GetNormalTexture() then btn:GetNormalTexture():SetAlpha(1) end
-    
+
     if not btn.cleanUIHooked then
         btn:HookScript("OnMouseDown", RedirectClickToAnchor)
         btn:HookScript("OnMouseUp", RedirectReleaseToAnchor)
@@ -46,14 +46,14 @@ end
 
 local function ApplyPetBarSkin()
     local petAnchor = _G["CleanUIPetBarAnchor"] or CreateFrame("Frame", "CleanUIPetBarAnchor", UIParent, "SecureHandlerStateTemplate")
-    petAnchor:SetSize(350, 35) 
-    
+    petAnchor:SetSize(350, 35)
+
     petAnchor:ClearAllPoints()
     petAnchor:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 0)
     petAnchor:SetClampedToScreen(true)
-    
-    if UI.MakeMovableAndSave then 
-        UI.MakeMovableAndSave(petAnchor, "PetBarAnchor") 
+
+    if UI.MakeMovableAndSave then
+        UI.MakeMovableAndSave(petAnchor, "PetBarAnchor")
     end
 
     if PetActionBarFrame then
@@ -73,7 +73,7 @@ local function ApplyPetBarSkin()
             btn:SetParent(petAnchor)
             btn:SetFrameLevel(5)
             btn:ClearAllPoints()
-            
+
             if i == 1 then
                 btn:SetPoint("BOTTOMLEFT", petAnchor, "BOTTOMLEFT", 0, 0)
             else
@@ -89,9 +89,9 @@ end
 
 F:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then
-        if UI.HaltModules then 
+        if UI.HaltModules then
             self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-            return 
+            return
         end
 
         ApplyPetBarSkin()

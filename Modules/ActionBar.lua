@@ -2,9 +2,9 @@ local _, UI = ...
 
 local Config = {
     ForceThreeBars = true,
-    MainBarOffset = 255,   
-    VerticalPadding = 15,  
-    BarGap = 2,            
+    MainBarOffset = 255,
+    VerticalPadding = 15,
+    BarGap = 2,
 }
 
 local F = CreateFrame("Frame")
@@ -29,7 +29,7 @@ local function ApplySelectiveLockdown()
 
     MainMenuBar:ClearAllPoints()
     MainMenuBar:SetPoint("BOTTOM", UIParent, "BOTTOM", Config.MainBarOffset, Config.VerticalPadding)
-    
+
     if not MainMenuBar.isLobotomized then
         MainMenuBar.ClearAllPoints = function() end
         MainMenuBar.SetPoint = function() end
@@ -39,18 +39,18 @@ local function ApplySelectiveLockdown()
     if MultiBarBottomLeft then
         MultiBarBottomLeft:ClearAllPoints()
         MultiBarBottomLeft:SetPoint("BOTTOMLEFT", ActionButton1, "TOPLEFT", 0, Config.BarGap)
-        
+
         if not MultiBarBottomLeft.isLobotomized then
             MultiBarBottomLeft.ClearAllPoints = function() end
             MultiBarBottomLeft.SetPoint = function() end
             MultiBarBottomLeft.isLobotomized = true
         end
     end
-    
+
     if MultiBarBottomRight then
         MultiBarBottomRight:ClearAllPoints()
         MultiBarBottomRight:SetPoint("BOTTOMLEFT", MultiBarBottomLeft, "TOPLEFT", 0, Config.BarGap)
-        
+
         if not MultiBarBottomRight.isLobotomized then
             MultiBarBottomRight.ClearAllPoints = function() end
             MultiBarBottomRight.SetPoint = function() end
@@ -93,27 +93,27 @@ local function ApplyCleanSkin()
 
     if CleanUIPositions.MinimalistMode then
         UI.HaltModules = true
-        
+
         Kill(MainMenuBarLeftEndCap)
         Kill(MainMenuBarRightEndCap)
-        
-        return 
+
+        return
     end
 
     local framesToDisable = {
-        MainMenuBarOverlayFrame, MainMenuBarMaxLevelBar, MainMenuExpBar, 
-        ReputationWatchBar, MainMenuBarPerformanceBarFrame, ExhaustionTick, 
+        MainMenuBarOverlayFrame, MainMenuBarMaxLevelBar, MainMenuExpBar,
+        ReputationWatchBar, MainMenuBarPerformanceBarFrame, ExhaustionTick,
         MainMenuBarArtFrame, BonusActionBarFrame,
-        CharacterMicroButton, SpellbookMicroButton, TalentMicroButton, QuestLogMicroButton, 
+        CharacterMicroButton, SpellbookMicroButton, TalentMicroButton, QuestLogMicroButton,
         SocialsMicroButton, WorldMapMicroButton, MainMenuMicroButton, HelpMicroButton,
         MainMenuBarBackpackButton, CharacterBag0Slot, CharacterBag1Slot, CharacterBag2Slot, CharacterBag3Slot, KeyRingButton
     }
 
     for _, f in ipairs(framesToDisable) do
-        if f then 
+        if f then
             f:UnregisterAllEvents()
-            f:Hide() 
-            f:SetParent(Hider) 
+            f:Hide()
+            f:SetParent(Hider)
         end
     end
 

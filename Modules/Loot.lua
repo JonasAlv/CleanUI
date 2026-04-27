@@ -48,8 +48,8 @@ function UI.UpdateLootTest()
         if not testFrames[i] then
             local f = CreateFrame("Frame", "CleanUILootTest"..i, UIParent)
             f:SetSize(280, 72)
-            f:SetScale(0.9) 
-            
+            f:SetScale(0.9)
+
             local bg = f:CreateTexture(nil, "BACKGROUND")
             bg:SetAllPoints()
             bg:SetTexture(0, 0, 0, 0.7)

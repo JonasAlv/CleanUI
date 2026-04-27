@@ -15,8 +15,8 @@ function UI.SetClassPortrait(portrait, unit, forceClass)
     local name = portrait:GetName() or ""
     local parentName = portrait:GetParent() and portrait:GetParent():GetName() or ""
 
-    if parentName:find("MicroButton") or name:find("SideTab") or parentName:find("SideTab") then 
-        return false 
+    if parentName:find("MicroButton") or name:find("SideTab") or parentName:find("SideTab") then
+        return false
     end
 
     local safeUnit = unit
@@ -45,12 +45,12 @@ end)
 function UI.RefreshPortraits()
 
     if PlayerPortrait then SetPortraitTexture(PlayerPortrait, "player") end
-    
+
     if TargetFramePortrait and UnitExists("target") then SetPortraitTexture(TargetFramePortrait, "target") end
     if FocusFramePortrait and UnitExists("focus") then SetPortraitTexture(FocusFramePortrait, "focus") end
     if TargetFrameToTPortrait and UnitExists("targettarget") then SetPortraitTexture(TargetFrameToTPortrait, "targettarget") end
     if FocusFrameToTPortrait and UnitExists("focustarget") then SetPortraitTexture(FocusFrameToTPortrait, "focustarget") end
-    
+
     for i = 1, 4 do
         local p = _G["PartyMemberFrame"..i.."Portrait"]
         if p and UnitExists("party"..i) then SetPortraitTexture(p, "party"..i) end

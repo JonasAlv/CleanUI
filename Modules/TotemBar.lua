@@ -6,13 +6,13 @@ local Hider = _G["CleanUIHider"] or CreateFrame("Frame", "CleanUITotemHider", UI
 
 local function EnforceTotemPosition()
     if UI.HaltModules or InCombatLockdown() then return end
-    
+
     local anchor = CleanUITotemBarAnchor
     if not anchor then return end
 
     if not CleanUIPositions or not CleanUIPositions["TotemBarAnchor"] then
         anchor:ClearAllPoints()
-        
+
         local floorButton
         if CleanUIStanceBarAnchor and CleanUIStanceBarAnchor:IsShown() then
             floorButton = ShapeshiftButton1
@@ -38,7 +38,7 @@ local function SkinTotemButton(btn)
 
     if icon then icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
     if nt then nt:SetAlpha(1) end
-    
+
     if not btn.cleanUIHooked then
         btn:HookScript("OnMouseDown", function(self, button)
             if IsShiftKeyDown() and IsControlKeyDown() and button == "LeftButton" then
@@ -67,9 +67,9 @@ local function ApplyTotemBarSkin()
     totemAnchor:SetSize(220, 40)
     totemAnchor:SetClampedToScreen(true)
     totemAnchor:SetMovable(true)
-    
-    if UI.MakeMovableAndSave then 
-        UI.MakeMovableAndSave(totemAnchor, "TotemBarAnchor") 
+
+    if UI.MakeMovableAndSave then
+        UI.MakeMovableAndSave(totemAnchor, "TotemBarAnchor")
     end
 
     if MultiCastActionBarFrame then
@@ -109,13 +109,13 @@ local function ApplyTotemBarSkin()
 end
 
 F:SetScript("OnEvent", function(self, event)
-    if event == "PLAYER_ENTERING_WORLD" then 
-        if UI.HaltModules then 
+    if event == "PLAYER_ENTERING_WORLD" then
+        if UI.HaltModules then
             self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-            return 
+            return
         end
-        
-        ApplyTotemBarSkin() 
+
+        ApplyTotemBarSkin()
         self:UnregisterEvent("PLAYER_ENTERING_WORLD")
     end
 end)

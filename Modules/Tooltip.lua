@@ -15,16 +15,16 @@ end)
 local function StyleTooltip(self)
     local hasItem = self:GetItem()
     local hasSpell = self:GetSpell()
-    
+
     local owner = self:GetOwner()
     local ownerName = owner and owner:GetName() or ""
     local isAura = ownerName:find("Buff") or ownerName:find("Debuff")
 
-    if InCombatLockdown() and not (hasItem or hasSpell or isAura) then 
-        self:Hide() 
-        return 
+    if InCombatLockdown() and not (hasItem or hasSpell or isAura) then
+        self:Hide()
+        return
     end
-    
+
     if not self:IsShown() then return end
 
     if hasItem or hasSpell then
@@ -33,10 +33,10 @@ local function StyleTooltip(self)
         local scale = self:GetEffectiveScale()
         self:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", (x / scale) + 15, (y / scale) + 15)
     end
-    
+
     self:SetBackdropColor(0.05, 0.05, 0.05, 0.8)
     self:SetBackdropBorderColor(0.15, 0.15, 0.15)
-    
+
     if GameTooltipStatusBar then
         local _, unit = self:GetUnit()
         if unit and UnitIsPlayer(unit) then
@@ -64,7 +64,7 @@ end)
 local CombatWatch = CreateFrame("Frame")
 CombatWatch:RegisterEvent("PLAYER_REGEN_DISABLED")
 CombatWatch:SetScript("OnEvent", function()
-    if GameTooltip:IsShown() then 
+    if GameTooltip:IsShown() then
         local hasItem = GameTooltip:GetItem()
         local hasSpell = GameTooltip:GetSpell()
         local owner = GameTooltip:GetOwner()
@@ -72,7 +72,7 @@ CombatWatch:SetScript("OnEvent", function()
         local isAura = ownerName:find("Buff") or ownerName:find("Debuff")
 
         if not (hasItem or hasSpell or isAura) then
-            GameTooltip:Hide() 
+            GameTooltip:Hide()
         end
     end
 end)

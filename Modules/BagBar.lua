@@ -21,12 +21,12 @@ end
 local function ApplyBagBarSkin()
     local bagsAnchor = CreateFrame("Frame", "CleanUIBagBarAnchor", UIParent)
     bagsAnchor:SetSize(220, 35)
-    bagsAnchor:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", 0, 36) 
+    bagsAnchor:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", 0, 36)
     bagsAnchor:SetClampedToScreen(true)
     bagsAnchor:SetMovable(true)
 
-    if UI.MakeMovableAndSave then 
-        UI.MakeMovableAndSave(bagsAnchor, "BagBarAnchor") 
+    if UI.MakeMovableAndSave then
+        UI.MakeMovableAndSave(bagsAnchor, "BagBarAnchor")
     end
 
     local bagButtons = {
@@ -35,7 +35,7 @@ local function ApplyBagBarSkin()
         CharacterBag1Slot,
         CharacterBag2Slot,
         CharacterBag3Slot,
-        KeyRingButton 
+        KeyRingButton
     }
 
     local function PositionBags()
@@ -49,7 +49,7 @@ local function ApplyBagBarSkin()
                 btn:SetParent(bagsAnchor)
                 btn:SetFrameLevel(2)
                 btn:ClearAllPoints()
-                
+
                 if not prev then
                     btn:SetPoint("BOTTOMRIGHT", bagsAnchor, "BOTTOMRIGHT", 0, 0)
                 else
@@ -61,7 +61,7 @@ local function ApplyBagBarSkin()
                     btn:HookScript("OnMouseUp", RedirectReleaseToAnchor)
                     btn.cleanUIHooked = true
                 end
-                
+
                 prev = btn
             end
         end
@@ -73,9 +73,9 @@ end
 
 F:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then
-        if UI.HaltModules then 
+        if UI.HaltModules then
             self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-            return 
+            return
         end
 
         ApplyBagBarSkin()

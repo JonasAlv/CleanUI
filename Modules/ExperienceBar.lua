@@ -20,7 +20,7 @@ local function LobotomizeDefaultBars()
         if frame then
             frame:UnregisterAllEvents()
             frame:Hide()
-            if CleanUIHider then frame:SetParent(CleanUIHider) end 
+            if CleanUIHider then frame:SetParent(CleanUIHider) end
             if frame.EnableMouse then frame:EnableMouse(false) end
         end
     end
@@ -28,7 +28,7 @@ end
 
 local function UpdateBar()
     if not bar or UI.HaltModules then return end
-    
+
     local repName, repStanding, repMin, repMax, repValue = GetWatchedFactionInfo()
     local playerLevel = UnitLevel("player")
     local isMaxLevel = (playerLevel >= MAX_LEVEL)
@@ -36,10 +36,10 @@ local function UpdateBar()
     if repName and (isMaxLevel or IsShiftKeyDown()) then
         bar:Show()
         bar.isRep = true
-        
+
         local color = FACTION_BAR_COLORS[repStanding]
         local curRep, maxRep = repValue - repMin, repMax - repMin
-        
+
         if maxRep <= 0 then maxRep = 1 curRep = 1 end
 
         bar:SetMinMaxValues(0, maxRep)
@@ -50,47 +50,47 @@ local function UpdateBar()
     elseif not isMaxLevel then
         bar:Show()
         bar.isRep = false
-        
+
         local curXP, maxXP = UnitXP("player"), UnitXPMax("player")
         if maxXP <= 0 then maxXP = 1 end
 
         bar:SetMinMaxValues(0, maxXP)
         bar:SetValue(curXP)
-        
-        if GetXPExhaustion() then 
+
+        if GetXPExhaustion() then
             bar:SetStatusBarColor(0.0, 0.39, 0.88)
-        else 
+        else
             bar:SetStatusBarColor(0.58, 0.0, 0.55)
         end
         bar.text:SetText(format("%s / %s (%d%%)", FormatNum(curXP), FormatNum(maxXP), math.floor((curXP / maxXP) * 100)))
 
-    else 
-        bar:Hide() 
+    else
+        bar:Hide()
     end
 end
 
 local function CreateBar()
     bar = CreateFrame("StatusBar", "CleanUIExpBar", UIParent)
     bar:SetHeight(10)
-    
+
     local anchorFrame = ActionButton1 or MainMenuBar
     bar:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -4)
     bar:SetPoint("TOPRIGHT", _G["ActionButton12"] or anchorFrame, "BOTTOMRIGHT", 0, -4)
     bar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
-    
+
     local bg = bar:CreateTexture(nil, "BACKGROUND")
     bg:SetPoint("TOPLEFT", -1, 1); bg:SetPoint("BOTTOMRIGHT", 1, -1)
-    bg:SetTexture(0, 0, 0, 1) 
+    bg:SetTexture(0, 0, 0, 1)
 
     local innerBg = bar:CreateTexture(nil, "BORDER")
     innerBg:SetAllPoints()
     innerBg:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
-    innerBg:SetVertexColor(0, 0, 0, 0.35) 
+    innerBg:SetVertexColor(0, 0, 0, 0.35)
 
     local barWidth = bar:GetWidth()
     for i = 1, 9 do
         local t = bar:CreateTexture(nil, "OVERLAY")
-        t:SetTexture(0, 0, 0, 1) 
+        t:SetTexture(0, 0, 0, 1)
         t:SetWidth(1)
         t:SetHeight(10)
         t:SetPoint("LEFT", bar, "LEFT", (i * (490 / 10)), 0)

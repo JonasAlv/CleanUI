@@ -6,19 +6,19 @@ local standardClasses = {
     WARLOCK = true, DRUID = true
 }
 
-UI.PlayerNameBG = nil 
+UI.PlayerNameBG = nil
 local function CreatePlayerNameBackground()
     if not UI.PlayerNameBG then
         UI.PlayerNameBG = PlayerFrame:CreateTexture(nil, "ARTWORK")
         UI.PlayerNameBG:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-LevelBackground")
-        
+
         UI.PlayerNameBG:SetSize(114, 18)
-        
+
         UI.PlayerNameBG:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 107, -22)
         UI.PlayerNameBG:SetTexCoord(1, 0, 0, 1)
-        
+
         local _, class = UnitClass("player")
-        
+
         if class and standardClasses[class] then
             local color = RAID_CLASS_COLORS[class]
             if color then
@@ -43,9 +43,9 @@ ThemeWatcher:SetScript("OnEvent", function(self, event, unit)
         if unit == "target" then UI.ApplyClassTheme("targettarget")
         elseif unit == "focus" then UI.ApplyClassTheme("focustarget")
         elseif unit and string.match(unit, "^party") then UI.ApplyClassTheme(unit) end
-    elseif event == "PLAYER_TARGET_CHANGED" then 
+    elseif event == "PLAYER_TARGET_CHANGED" then
         UI.ApplyClassTheme("targettarget")
-    elseif event == "PLAYER_FOCUS_CHANGED" then 
+    elseif event == "PLAYER_FOCUS_CHANGED" then
         UI.ApplyClassTheme("focustarget")
     elseif event == "PARTY_MEMBERS_CHANGED" then
         for i = 1, 4 do UI.ApplyClassTheme("party"..i) end
@@ -55,19 +55,19 @@ end)
 
 function UI.ProtectFrame(healthBar)
     if not healthBar or healthBar.hooked then return end
-    
+
     hooksecurefunc(healthBar, "SetStatusBarColor", function(self, r, g, b)
         if self.isCleanUI_Updating then return end
 
         local parent = self:GetParent()
         local unit = parent.unit or (parent:GetParent() and parent:GetParent().unit)
         local pName = parent:GetName() or ""
-        
+
         if not unit then
             if pName == "TargetFrameToT" then unit = "targettarget"
             elseif pName == "FocusFrameToT" then unit = "focustarget" end
         end
-        
+
         if unit then
             local safeUnit = unit
             if UnitIsUnit(unit, "player") then safeUnit = "player"
@@ -86,7 +86,7 @@ function UI.ProtectFrame(healthBar)
 
             if tClass and standardClasses[tClass] then
                 local color = RAID_CLASS_COLORS[tClass]
-                if color then 
+                if color then
                     self.isCleanUI_Updating = true
                     self:SetStatusBarColor(color.r, color.g, color.b)
                     self.isCleanUI_Updating = false
@@ -106,22 +106,22 @@ function UI.ApplyClassTheme(unit, forceClass)
     elseif UnitIsUnit(unit, "focus") then safeUnit = "focus" end
 
     local main, h, p
-    if unit == "player" then 
+    if unit == "player" then
         main, h, p = PlayerFrame, PlayerFrameHealthBar, PlayerPortrait
-    elseif unit == "target" then 
+    elseif unit == "target" then
         main, h, p = TargetFrame, TargetFrameHealthBar, TargetFramePortrait
-    elseif unit == "focus" then 
+    elseif unit == "focus" then
         main, h, p = FocusFrame, FocusFrameHealthBar, FocusFramePortrait
-    elseif unit == "targettarget" then 
+    elseif unit == "targettarget" then
         main, h, p = TargetFrameToT, TargetFrameToTHealthBar, TargetFrameToTPortrait
-    elseif unit == "focustarget" then 
+    elseif unit == "focustarget" then
         main, h, p = FocusFrameToT, FocusFrameToTHealthBar, FocusFrameToTPortrait
-    elseif unit == "pet" then 
-        main, h, p = PetFrame, PetFrameHealthBar, PetPortrait 
+    elseif unit == "pet" then
+        main, h, p = PetFrame, PetFrameHealthBar, PetPortrait
     else
         local partyId = string.match(unit, "^party(%d)$")
         local partyPetId = string.match(unit, "^partypet(%d)$")
-        
+
         if partyId then
             main, h, p = _G["PartyMemberFrame"..partyId], _G["PartyMemberFrame"..partyId.."HealthBar"], _G["PartyMemberFrame"..partyId.."Portrait"]
         elseif partyPetId then
@@ -160,13 +160,13 @@ end
 if TargetFrame_CheckFaction then
     hooksecurefunc("TargetFrame_CheckFaction", function(self)
         if not self.unit or not self.nameBackground then return end
-        
+
         local safeUnit = self.unit
         if UnitIsUnit(safeUnit, "player") then safeUnit = "player" end
 
         if UnitIsPlayer(safeUnit) then
             local _, classToUse = UnitClass(safeUnit)
-            
+
             if classToUse and standardClasses[classToUse] then
                 local color = RAID_CLASS_COLORS[classToUse]
                 if color then
@@ -179,7 +179,7 @@ end
 
 local function ApplyTextOutline(fontString)
     if not fontString then return end
-    
+
     local font, size = fontString:GetFont()
     if font and size then
         fontString:SetFont(font, size, "OUTLINE")

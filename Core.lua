@@ -6,7 +6,7 @@ local Setup = CreateFrame("Frame")
 Setup:RegisterEvent("PLAYER_LOGIN")
 Setup:SetScript("OnEvent", function()
     if CleanUI_UseClassPortraits == nil then CleanUI_UseClassPortraits = true end
-    
+
     CleanUIPositions = CleanUIPositions or {}
 
     if TargetFrameToTHealthBar then UI.ProtectFrame(TargetFrameToTHealthBar) end
@@ -16,37 +16,37 @@ end)
 SLASH_CLEANUI1 = "/cui"
 SlashCmdList["CLEANUI"] = function(msg)
     msg = msg:lower()
-    
+
     if msg == "reset" then
         local isMinimalist = CleanUIPositions and CleanUIPositions.MinimalistMode
-        
-        CleanUIPositions = {} 
-        
+
+        CleanUIPositions = {}
+
         CleanUIPositions.MinimalistMode = isMinimalist
 
         local frames = {
-            PlayerFrame, TargetFrame, FocusFrame, PetFrame, 
-            TargetFrameToT, FocusFrameToT, 
-            CleanUILootAnchor,      
-            CleanUIActionBarAnchor, 
+            PlayerFrame, TargetFrame, FocusFrame, PetFrame,
+            TargetFrameToT, FocusFrameToT,
+            CleanUILootAnchor,
+            CleanUIActionBarAnchor,
             CleanUIPartyAnchor,
             CleanUIPetBarAnchor,
             CleanUIStanceBarAnchor,
             CleanUIMicroMenuAnchor,
             CleanUIBagBarAnchor,
         }
-        
+
         for i = 1, 4 do
             table.insert(frames, _G["PartyMemberFrame"..i])
             table.insert(frames, _G["PartyMemberFrame"..i.."PetFrame"])
         end
 
-        for _, f in pairs(frames) do 
-            if f then 
+        for _, f in pairs(frames) do
+            if f then
                 if f.SetMovable then f:SetMovable(true) end
-                f:SetUserPlaced(false) 
-                f:ClearAllPoints()     
-            end 
+                f:SetUserPlaced(false)
+                f:ClearAllPoints()
+            end
         end
 
         print("|cff00ff00CleanUI:|r Positions reset (Settings Preserved). Reloading...")

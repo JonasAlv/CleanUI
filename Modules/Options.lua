@@ -1,7 +1,7 @@
 local _, UI = ...
 
 local button = CreateFrame("Button", "CleanUIMinimapButton", Minimap)
-button:SetSize(34, 34) 
+button:SetSize(34, 34)
 button:SetFrameStrata("MEDIUM")
 button:SetFrameLevel(8)
 
@@ -9,7 +9,7 @@ local bg = button:CreateTexture(nil, "BACKGROUND")
 bg:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
 bg:SetSize(21, 21)
 bg:SetPoint("CENTER")
-bg:SetVertexColor(0, 0, 0, 1) 
+bg:SetVertexColor(0, 0, 0, 1)
 
 local border = button:CreateTexture(nil, "OVERLAY")
 border:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
@@ -20,7 +20,7 @@ local text = button:CreateFontString(nil, "OVERLAY")
 text:SetFont("Fonts\\FRIZQT__.TTF", 9, "OUTLINE")
 text:SetPoint("CENTER")
 text:SetText("CUI")
-text:SetTextColor(1, 0.82, 0) 
+text:SetTextColor(1, 0.82, 0)
 
 button:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
 button:RegisterForDrag("LeftButton")
@@ -38,13 +38,13 @@ end
 
 local function ToggleMinimalistMode()
     CleanUIPositions = CleanUIPositions or {}
-    
+
     CleanUIPositions.MinimalistMode = not CleanUIPositions.MinimalistMode
-    
-    print("|cff00ff00CleanUI:|r Minimalist Mode (Hide Gryphons Only) " .. 
-        (CleanUIPositions.MinimalistMode and "|cff00ff00Enabled|r" or "|cffff0000Disabled|r") .. 
+
+    print("|cff00ff00CleanUI:|r Minimalist Mode (Hide Gryphons Only) " ..
+        (CleanUIPositions.MinimalistMode and "|cff00ff00Enabled|r" or "|cffff0000Disabled|r") ..
         ". Reloading UI...")
-        
+
     ReloadUI()
 end
 
@@ -69,18 +69,18 @@ local DropdownMenu = CreateFrame("Frame", "CleanUIDropdownMenu", UIParent, "UIDr
 
 local function InitializeMenu(self, level)
     local info = UIDropDownMenu_CreateInfo()
-    
+
     info.isTitle = true
     info.text = "CleanUI Options"
     info.notCheckable = true
     UIDropDownMenu_AddButton(info)
 
     local items = {
-        {t="Toggle Portraits", c="portrait"}, 
-        {t="Loot Test Mode", c="loot test"}, 
+        {t="Toggle Portraits", c="portrait"},
+        {t="Loot Test Mode", c="loot test"},
         {t="Party Test Mode", c="party test"}
     }
-    
+
     for _, v in ipairs(items) do
         info = UIDropDownMenu_CreateInfo()
         info.text = v.t

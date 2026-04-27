@@ -11,11 +11,11 @@ local function SkinNativeStanceButton(btn)
     local nt = btn:GetNormalTexture()
     local border = _G[name.."Border"]
     local icon = _G[name.."Icon"]
-    
+
     if nt then nt:SetAlpha(1) end
     if border then border:SetAlpha(1) end
     if icon then icon:SetTexCoord(0, 1, 0, 1) end
-    
+
     if btn.cleanUIBorder then
         btn.cleanUIBorder:Hide()
         btn.cleanUIBorder:SetAlpha(0)
@@ -27,7 +27,7 @@ local isLocking = false
 local function ApplyStanceBarLockdown()
     if UI.HaltModules or InCombatLockdown() or isLocking then return end
     isLocking = true
-    
+
     local anchor = _G["CleanUIStanceBarAnchor"]
     if not anchor then
         isLocking = false
@@ -36,7 +36,7 @@ local function ApplyStanceBarLockdown()
 
     if not CleanUIPositions or not CleanUIPositions["StanceBarAnchor"] then
         anchor:ClearAllPoints()
-        
+
         local floorButton
         if MultiBarBottomRight and MultiBarBottomRight:IsShown() then
             floorButton = MultiBarBottomRightButton1
@@ -45,7 +45,7 @@ local function ApplyStanceBarLockdown()
         else
             floorButton = ActionButton1
         end
-        
+
         if floorButton then
             anchor:SetPoint("BOTTOMLEFT", floorButton, "TOPLEFT", 0, 4)
         else
@@ -55,7 +55,7 @@ local function ApplyStanceBarLockdown()
 
     ShapeshiftButton1:ClearAllPoints()
     ShapeshiftButton1:SetPoint("BOTTOMLEFT", anchor, "BOTTOMLEFT", 0, 0)
-    
+
     for i = 2, 10 do
         local btn = _G["ShapeshiftButton"..i]
         if btn then
@@ -80,15 +80,15 @@ end
 local function InitStanceBar()
     local anchor = _G["CleanUIStanceBarAnchor"] or CreateFrame("Frame", "CleanUIStanceBarAnchor", UIParent)
     anchor:SetSize(30, 30)
-    
-    if UI.MakeMovableAndSave then 
-        UI.MakeMovableAndSave(anchor, "StanceBarAnchor") 
+
+    if UI.MakeMovableAndSave then
+        UI.MakeMovableAndSave(anchor, "StanceBarAnchor")
     end
 
     for i = 1, 10 do
         local btn = _G["ShapeshiftButton"..i]
         if btn then
-            btn:SetParent(anchor) 
+            btn:SetParent(anchor)
             SkinNativeStanceButton(btn)
         end
     end
@@ -96,7 +96,7 @@ local function InitStanceBar()
     if ShapeshiftBarFrame then
         ShapeshiftBarFrame:SetParent(Hider)
     end
-    
+
     local texturesToHide = {
         ShapeshiftBarLeft, ShapeshiftBarMiddle, ShapeshiftBarRight
     }
@@ -108,13 +108,13 @@ local function InitStanceBar()
 end
 
 F:SetScript("OnEvent", function(self, event)
-    if event == "PLAYER_ENTERING_WORLD" then 
-        if UI.HaltModules then 
+    if event == "PLAYER_ENTERING_WORLD" then
+        if UI.HaltModules then
             self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-            return 
+            return
         end
-        
-        InitStanceBar() 
+
+        InitStanceBar()
     end
 end)
 
