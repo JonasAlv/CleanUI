@@ -2,69 +2,68 @@ local _, UI = ...
 local F = CreateFrame("Frame")
 F:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-local Hider = CreateFrame("Frame", "CleanUIPetHider", UIParent)
-Hider:Hide()
+local Hider = CreateFrame("Frame", "CleanUIPetHider", UIParent):Hide()
+local isLocking = false
 
-local function GetTargetAnchor(self)
-    local parent = self:GetParent()
-    while parent do
-        if parent == CleanUIPetBarAnchor then return parent end
-        parent = parent:GetParent()
-    end
-    return nil
-end
+local function ApplyPetBarLockdown()
+    if not CleanUIPositions or CleanUIPositions.MinimalistMode or InCombatLockdown() or isLocking then return end
+    isLocking = true
+    
+    local anchor = _G["CleanUIPetBarAnchor"]
+    if not anchor then isLocking = false; return end
 
-local function RedirectClickToAnchor(self, button)
-    if button == "LeftButton" and IsShiftKeyDown() and IsControlKeyDown() then
-        local anchor = GetTargetAnchor(self)
-        if anchor and anchor:GetScript("OnMouseDown") then
-            anchor:GetScript("OnMouseDown")(anchor, button)
+    if not CleanUIPositions["PetBarAnchor"] then
+        anchor:ClearAllPoints()
+        
+        local floorButton
+        if MultiBarBottomRight and MultiBarBottomRight:IsShown() then
+            floorButton = MultiBarBottomRightButton1
+        elseif MultiBarBottomLeft and MultiBarBottomLeft:IsShown() then
+            floorButton = MultiBarBottomLeftButton1
+        else
+            floorButton = ActionButton1
+        end
+        
+        if floorButton then
+            anchor:SetPoint("BOTTOMLEFT", floorButton, "TOPLEFT", 0, 40)
+        else
+            anchor:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 10, 150)
         end
     end
-end
 
-local function RedirectReleaseToAnchor(self, button)
-    local anchor = GetTargetAnchor(self)
-    if anchor and anchor.isCleanUIMoving and anchor:GetScript("OnMouseUp") then
-        anchor:GetScript("OnMouseUp")(anchor, button)
+    for i = 1, 10 do
+        local btn = _G["PetActionButton"..i]
+        if btn then
+            btn:ClearAllPoints()
+            if i == 1 then
+                btn:SetPoint("BOTTOMLEFT", anchor, "BOTTOMLEFT", 0, 0)
+            else
+                btn:SetPoint("LEFT", _G["PetActionButton"..(i-1)], "RIGHT", 6, 0)
+            end
+        end
     end
+
+    isLocking = false
 end
 
-local function SkinButton(btn)
-    if not btn then return end
-    local name = btn:GetName()
-    local icon = _G[name.."Icon"]
-    if icon then icon:SetTexCoord(0, 1, 0, 1) end
-    if btn:GetNormalTexture() then btn:GetNormalTexture():SetAlpha(1) end
 
-    if not btn.cleanUIHooked then
-        btn:HookScript("OnMouseDown", RedirectClickToAnchor)
-        btn:HookScript("OnMouseUp", RedirectReleaseToAnchor)
-        btn.cleanUIHooked = true
-    end
-end
+local function InitPetBar()
+    if CleanUIPositions.MinimalistMode then return end
 
-local function ApplyPetBarSkin()
     local petAnchor = _G["CleanUIPetBarAnchor"] or CreateFrame("Frame", "CleanUIPetBarAnchor", UIParent, "SecureHandlerStateTemplate")
     petAnchor:SetSize(350, 35)
-
-    petAnchor:ClearAllPoints()
-    petAnchor:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 0, 0)
-    petAnchor:SetClampedToScreen(true)
 
     if UI.MakeMovableAndSave then
         UI.MakeMovableAndSave(petAnchor, "PetBarAnchor")
     end
 
     if PetActionBarFrame then
-        PetActionBarFrame:SetAlpha(0)
-        PetActionBarFrame:EnableMouse(false)
-        PetActionBarFrame:SetSize(1, 1)
+        PetActionBarFrame:SetParent(Hider)
     end
 
     local artFrames = {SlidingActionBarTexture0, SlidingActionBarTexture1}
     for _, frame in ipairs(artFrames) do
-        if frame then frame:SetParent(Hider) end
+        if frame then frame:Hide(); frame:SetAlpha(0) end
     end
 
     for i = 1, 10 do
@@ -72,29 +71,28 @@ local function ApplyPetBarSkin()
         if btn then
             btn:SetParent(petAnchor)
             btn:SetFrameLevel(5)
-            btn:ClearAllPoints()
-
-            if i == 1 then
-                btn:SetPoint("BOTTOMLEFT", petAnchor, "BOTTOMLEFT", 0, 0)
-            else
-                btn:SetPoint("LEFT", _G["PetActionButton"..(i-1)], "RIGHT", 6, 0)
-            end
-
-            SkinButton(btn)
         end
     end
 
     RegisterStateDriver(petAnchor, "visibility", "[pet] show; hide")
+
+    ApplyPetBarLockdown()
 end
 
 F:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then
-        if UI.HaltModules then
-            self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-            return
-        end
-
-        ApplyPetBarSkin()
+        InitPetBar()
         self:UnregisterEvent("PLAYER_ENTERING_WORLD")
     end
 end)
+
+if MultiBarBottomLeft then
+    MultiBarBottomLeft:HookScript("OnShow", ApplyPetBarLockdown)
+    MultiBarBottomLeft:HookScript("OnHide", ApplyPetBarLockdown)
+end
+if MultiBarBottomRight then
+    MultiBarBottomRight:HookScript("OnShow", ApplyPetBarLockdown)
+    MultiBarBottomRight:HookScript("OnHide", ApplyPetBarLockdown)
+end
+
+hooksecurefunc("UIParent_ManageFramePositions", ApplyPetBarLockdown)

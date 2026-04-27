@@ -4,7 +4,7 @@ F:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 local function RedirectClickToAnchor(self, button)
     if button == "LeftButton" and IsShiftKeyDown() and IsControlKeyDown() then
-        local anchor = CleanUIMicroMenuAnchor
+        local anchor = _G["CleanUIMicroMenuAnchor"]
         if anchor and anchor:GetScript("OnMouseDown") then
             anchor:GetScript("OnMouseDown")(anchor, button)
         end
@@ -12,18 +12,23 @@ local function RedirectClickToAnchor(self, button)
 end
 
 local function RedirectReleaseToAnchor(self, button)
-    local anchor = CleanUIMicroMenuAnchor
+    local anchor = _G["CleanUIMicroMenuAnchor"]
     if anchor and anchor.isCleanUIMoving and anchor:GetScript("OnMouseUp") then
         anchor:GetScript("OnMouseUp")(anchor, button)
     end
 end
 
 local function ApplyMicroMenuSkin()
-    local menuAnchor = CreateFrame("Frame", "CleanUIMicroMenuAnchor", UIParent)
+    if not CleanUIPositions or CleanUIPositions.MinimalistMode then return end
+
+    local menuAnchor = _G["CleanUIMicroMenuAnchor"] or CreateFrame("Frame", "CleanUIMicroMenuAnchor", UIParent)
     menuAnchor:SetSize(300, 35)
-    menuAnchor:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", 0, 0)
     menuAnchor:SetClampedToScreen(true)
     menuAnchor:SetMovable(true)
+
+    if not CleanUIPositions["MicroMenuAnchor"] then
+        menuAnchor:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", 0, 0)
+    end
 
     if UI.MakeMovableAndSave then
         UI.MakeMovableAndSave(menuAnchor, "MicroMenuAnchor")
@@ -38,8 +43,8 @@ local function ApplyMicroMenuSkin()
         "SocialsMicroButton",
         "LFDMicroButton",
         "PVPMicroButton",
-        "PathToAscensionMicroButton",
-        "ChallengesMicroButton",
+        "PathToAscensionMicroButton", -- Ascension support
+        "ChallengesMicroButton",      -- Ascension support
         "MainMenuMicroButton",
         "HelpMicroButton"
     }
@@ -49,7 +54,7 @@ local function ApplyMicroMenuSkin()
 
         local prev = nil
         local totalWidth = 0
-        local spacing = -3
+        local spacing = -3 
 
         for _, name in ipairs(buttonNames) do
             local btn = _G[name]
@@ -91,11 +96,6 @@ end
 
 F:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then
-        if UI.HaltModules then
-            self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-            return
-        end
-
         ApplyMicroMenuSkin()
         self:UnregisterEvent("PLAYER_ENTERING_WORLD")
     end

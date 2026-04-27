@@ -20,14 +20,14 @@ local function LobotomizeDefaultBars()
         if frame then
             frame:UnregisterAllEvents()
             frame:Hide()
-            if CleanUIHider then frame:SetParent(CleanUIHider) end
+            if _G["CleanUIHider"] then frame:SetParent(_G["CleanUIHider"]) end
             if frame.EnableMouse then frame:EnableMouse(false) end
         end
     end
 end
 
 local function UpdateBar()
-    if not bar or UI.HaltModules then return end
+    if not bar or CleanUIPositions.MinimalistMode then return end
 
     local repName, repStanding, repMin, repMax, repValue = GetWatchedFactionInfo()
     local playerLevel = UnitLevel("player")
@@ -39,7 +39,6 @@ local function UpdateBar()
 
         local color = FACTION_BAR_COLORS[repStanding]
         local curRep, maxRep = repValue - repMin, repMax - repMin
-
         if maxRep <= 0 then maxRep = 1 curRep = 1 end
 
         bar:SetMinMaxValues(0, maxRep)
@@ -58,9 +57,9 @@ local function UpdateBar()
         bar:SetValue(curXP)
 
         if GetXPExhaustion() then
-            bar:SetStatusBarColor(0.0, 0.39, 0.88)
+            bar:SetStatusBarColor(0.0, 0.39, 0.88) -- Blue (Rested)
         else
-            bar:SetStatusBarColor(0.58, 0.0, 0.55)
+            bar:SetStatusBarColor(0.58, 0.0, 0.55) -- Purple (Normal)
         end
         bar.text:SetText(format("%s / %s (%d%%)", FormatNum(curXP), FormatNum(maxXP), math.floor((curXP / maxXP) * 100)))
 
@@ -87,13 +86,12 @@ local function CreateBar()
     innerBg:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
     innerBg:SetVertexColor(0, 0, 0, 0.35)
 
-    local barWidth = bar:GetWidth()
     for i = 1, 9 do
         local t = bar:CreateTexture(nil, "OVERLAY")
         t:SetTexture(0, 0, 0, 1)
         t:SetWidth(1)
         t:SetHeight(10)
-        t:SetPoint("LEFT", bar, "LEFT", (i * (490 / 10)), 0)
+        t:SetPoint("LEFT", bar, "LEFT", (i * (bar:GetWidth() / 10)), 0)
     end
 
     bar.text = bar:CreateFontString(nil, "OVERLAY")
@@ -135,7 +133,7 @@ F:RegisterEvent("UPDATE_EXHAUSTION")
 F:RegisterEvent("UPDATE_FACTION")
 
 F:SetScript("OnEvent", function(self, event)
-    if UI.HaltModules then return end
+    if not CleanUIPositions or CleanUIPositions.MinimalistMode then return end
 
     if event == "PLAYER_ENTERING_WORLD" then
         LobotomizeDefaultBars()

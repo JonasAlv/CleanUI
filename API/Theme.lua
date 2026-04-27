@@ -12,7 +12,7 @@ local function CreatePlayerNameBackground()
         UI.PlayerNameBG = PlayerFrame:CreateTexture(nil, "ARTWORK")
         UI.PlayerNameBG:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-LevelBackground")
 
-        UI.PlayerNameBG:SetSize(114, 18)
+        UI.PlayerNameBG:SetSize(118, 18)
 
         UI.PlayerNameBG:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 107, -22)
         UI.PlayerNameBG:SetTexCoord(1, 0, 0, 1)

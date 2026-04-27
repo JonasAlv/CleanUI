@@ -4,7 +4,7 @@ F:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 local function RedirectClickToAnchor(self, button)
     if button == "LeftButton" and IsShiftKeyDown() and IsControlKeyDown() then
-        local anchor = CleanUIBagBarAnchor
+        local anchor = _G["CleanUIBagBarAnchor"]
         if anchor and anchor:GetScript("OnMouseDown") then
             anchor:GetScript("OnMouseDown")(anchor, button)
         end
@@ -12,18 +12,23 @@ local function RedirectClickToAnchor(self, button)
 end
 
 local function RedirectReleaseToAnchor(self, button)
-    local anchor = CleanUIBagBarAnchor
+    local anchor = _G["CleanUIBagBarAnchor"]
     if anchor and anchor.isCleanUIMoving and anchor:GetScript("OnMouseUp") then
         anchor:GetScript("OnMouseUp")(anchor, button)
     end
 end
 
 local function ApplyBagBarSkin()
-    local bagsAnchor = CreateFrame("Frame", "CleanUIBagBarAnchor", UIParent)
+    if not CleanUIPositions or CleanUIPositions.MinimalistMode then return end
+
+    local bagsAnchor = _G["CleanUIBagBarAnchor"] or CreateFrame("Frame", "CleanUIBagBarAnchor", UIParent)
     bagsAnchor:SetSize(220, 35)
-    bagsAnchor:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", 0, 36)
     bagsAnchor:SetClampedToScreen(true)
     bagsAnchor:SetMovable(true)
+
+    if not CleanUIPositions["BagBarAnchor"] then
+        bagsAnchor:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -4, 36)
+    end
 
     if UI.MakeMovableAndSave then
         UI.MakeMovableAndSave(bagsAnchor, "BagBarAnchor")
@@ -73,11 +78,6 @@ end
 
 F:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then
-        if UI.HaltModules then
-            self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-            return
-        end
-
         ApplyBagBarSkin()
         self:UnregisterEvent("PLAYER_ENTERING_WORLD")
     end

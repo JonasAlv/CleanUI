@@ -1,42 +1,21 @@
 local _, UI = ...
+
 local F = CreateFrame("Frame")
 F:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-local Hider = CreateFrame("Frame", "CleanUIStanceHider", UIParent)
-Hider:Hide()
-
-local function SkinNativeStanceButton(btn)
-    if not btn then return end
-    local name = btn:GetName()
-    local nt = btn:GetNormalTexture()
-    local border = _G[name.."Border"]
-    local icon = _G[name.."Icon"]
-
-    if nt then nt:SetAlpha(1) end
-    if border then border:SetAlpha(1) end
-    if icon then icon:SetTexCoord(0, 1, 0, 1) end
-
-    if btn.cleanUIBorder then
-        btn.cleanUIBorder:Hide()
-        btn.cleanUIBorder:SetAlpha(0)
-    end
-end
-
+local Hider = CreateFrame("Frame", "CleanUIStanceHider", UIParent):Hide()
 local isLocking = false
 
 local function ApplyStanceBarLockdown()
-    if UI.HaltModules or InCombatLockdown() or isLocking then return end
+    if not CleanUIPositions or CleanUIPositions.MinimalistMode or InCombatLockdown() or isLocking then return end
     isLocking = true
-
+    
     local anchor = _G["CleanUIStanceBarAnchor"]
-    if not anchor then
-        isLocking = false
-        return
-    end
+    if not anchor then isLocking = false; return end
 
-    if not CleanUIPositions or not CleanUIPositions["StanceBarAnchor"] then
+    if not CleanUIPositions["StanceBarAnchor"] then
         anchor:ClearAllPoints()
-
+        
         local floorButton
         if MultiBarBottomRight and MultiBarBottomRight:IsShown() then
             floorButton = MultiBarBottomRightButton1
@@ -45,7 +24,7 @@ local function ApplyStanceBarLockdown()
         else
             floorButton = ActionButton1
         end
-
+        
         if floorButton then
             anchor:SetPoint("BOTTOMLEFT", floorButton, "TOPLEFT", 0, 4)
         else
@@ -53,9 +32,11 @@ local function ApplyStanceBarLockdown()
         end
     end
 
-    ShapeshiftButton1:ClearAllPoints()
-    ShapeshiftButton1:SetPoint("BOTTOMLEFT", anchor, "BOTTOMLEFT", 0, 0)
-
+    if ShapeshiftButton1 then
+        ShapeshiftButton1:ClearAllPoints()
+        ShapeshiftButton1:SetPoint("BOTTOMLEFT", anchor, "BOTTOMLEFT", 0, 0)
+    end
+    
     for i = 2, 10 do
         local btn = _G["ShapeshiftButton"..i]
         if btn then
@@ -64,39 +45,30 @@ local function ApplyStanceBarLockdown()
         end
     end
 
-    if ShapeshiftButton1.SetPoint ~= (function() end) then
-        for i = 1, 10 do
-            local b = _G["ShapeshiftButton"..i]
-            if b then
-                b.ClearAllPoints = function() end
-                b.SetPoint = function() end
-            end
-        end
-    end
-
     isLocking = false
 end
 
 local function InitStanceBar()
+    if CleanUIPositions.MinimalistMode then return end
+
     local anchor = _G["CleanUIStanceBarAnchor"] or CreateFrame("Frame", "CleanUIStanceBarAnchor", UIParent)
     anchor:SetSize(30, 30)
-
-    if UI.MakeMovableAndSave then
-        UI.MakeMovableAndSave(anchor, "StanceBarAnchor")
+    
+    if UI.MakeMovableAndSave then 
+        UI.MakeMovableAndSave(anchor, "StanceBarAnchor") 
     end
 
     for i = 1, 10 do
         local btn = _G["ShapeshiftButton"..i]
         if btn then
-            btn:SetParent(anchor)
-            SkinNativeStanceButton(btn)
+            btn:SetParent(anchor) 
         end
     end
 
     if ShapeshiftBarFrame then
         ShapeshiftBarFrame:SetParent(Hider)
     end
-
+    
     local texturesToHide = {
         ShapeshiftBarLeft, ShapeshiftBarMiddle, ShapeshiftBarRight
     }
@@ -108,13 +80,8 @@ local function InitStanceBar()
 end
 
 F:SetScript("OnEvent", function(self, event)
-    if event == "PLAYER_ENTERING_WORLD" then
-        if UI.HaltModules then
-            self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-            return
-        end
-
-        InitStanceBar()
+    if event == "PLAYER_ENTERING_WORLD" then 
+        InitStanceBar() 
     end
 end)
 

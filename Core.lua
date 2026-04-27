@@ -4,10 +4,18 @@ UI.ClassPath = "Interface\\AddOns\\CleanUI\\Media\\classes\\"
 
 local Setup = CreateFrame("Frame")
 Setup:RegisterEvent("PLAYER_LOGIN")
-Setup:SetScript("OnEvent", function()
-    if CleanUI_UseClassPortraits == nil then CleanUI_UseClassPortraits = true end
+Setup:RegisterEvent("PLAYER_ENTERING_WORLD")
 
+Setup:SetScript("OnEvent", function(self, event)
     CleanUIPositions = CleanUIPositions or {}
+    
+    if CleanUI_UseClassPortraits == nil then 
+        CleanUI_UseClassPortraits = true 
+    end
+    
+    if CleanUIPositions.MinimalistMode == nil then 
+        CleanUIPositions.MinimalistMode = true 
+    end
 
     if TargetFrameToTHealthBar then UI.ProtectFrame(TargetFrameToTHealthBar) end
     if FocusFrameToTHealthBar then UI.ProtectFrame(FocusFrameToTHealthBar) end
@@ -16,40 +24,32 @@ end)
 SLASH_CLEANUI1 = "/cui"
 SlashCmdList["CLEANUI"] = function(msg)
     msg = msg:lower()
-
+    
     if msg == "reset" then
-        local isMinimalist = CleanUIPositions and CleanUIPositions.MinimalistMode
-
-        CleanUIPositions = {}
-
-        CleanUIPositions.MinimalistMode = isMinimalist
+        CleanUIPositions = {} 
+        CleanUIPositions.MinimalistMode = true 
 
         local frames = {
-            PlayerFrame, TargetFrame, FocusFrame, PetFrame,
-            TargetFrameToT, FocusFrameToT,
-            CleanUILootAnchor,
-            CleanUIActionBarAnchor,
-            CleanUIPartyAnchor,
-            CleanUIPetBarAnchor,
-            CleanUIStanceBarAnchor,
-            CleanUIMicroMenuAnchor,
-            CleanUIBagBarAnchor,
+            PlayerFrame, TargetFrame, FocusFrame, PetFrame, 
+            TargetFrameToT, FocusFrameToT, 
+            CleanUILootAnchor, CleanUIActionBarAnchor, CleanUIPartyAnchor,
+            CleanUIPetBarAnchor, CleanUIStanceBarAnchor, CleanUIMicroMenuAnchor, CleanUIBagBarAnchor,
         }
-
+        
         for i = 1, 4 do
             table.insert(frames, _G["PartyMemberFrame"..i])
             table.insert(frames, _G["PartyMemberFrame"..i.."PetFrame"])
         end
 
-        for _, f in pairs(frames) do
-            if f then
+        for _, f in pairs(frames) do 
+            if f then 
                 if f.SetMovable then f:SetMovable(true) end
-                f:SetUserPlaced(false)
-                f:ClearAllPoints()
-            end
+                f:SetUserPlaced(false) 
+                f:ClearAllPoints()     
+            end 
         end
 
-        print("|cff00ff00CleanUI:|r Positions reset (Settings Preserved). Reloading...")
+        print("|cff00ff00CleanUI:|r UI reset to Blizzlike (Gryphons Hidden). Reloading...")
         ReloadUI()
 
     elseif msg:find("loot") and msg:find("test") then
@@ -65,7 +65,7 @@ SlashCmdList["CLEANUI"] = function(msg)
     elseif msg == "portrait" then
         CleanUI_UseClassPortraits = not CleanUI_UseClassPortraits
         if UI.RefreshPortraits then UI.RefreshPortraits() end
-        print("|cff00ff00CleanUI:|r Portraits set to " .. (CleanUI_UseClassPortraits and "|cff00ff00Class Icons|r" or "|cffff00003D Faces|r"))
+        print("|cff00ff00CleanUI:|r Portraits toggled.")
     end
 end
 

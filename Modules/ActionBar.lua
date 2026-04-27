@@ -1,25 +1,25 @@
 local _, UI = ...
 
 local Config = {
-    ForceThreeBars = true,
-    MainBarOffset = 255,
-    VerticalPadding = 15,
-    BarGap = 2,
+    MainBarOffset = 255,   
+    VerticalPadding = 15,  
+    BarGap = 2,            
 }
 
 local F = CreateFrame("Frame")
-F:RegisterEvent("PLAYER_LOGIN")
+F:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-local Hider = CreateFrame("Frame", "CleanUIHider", UIParent)
-Hider:Hide()
-
+local Hider = CreateFrame("Frame", "CleanUIHider", UIParent):Hide()
 local isLocking = false
 
 local function Kill(f)
     if not f or f.isDead then return end
     f:Hide()
-    f:SetParent(Hider)
-    f.Show = function() end
+    if f.SetAlpha then f:SetAlpha(0) end
+    if f.SetParent and f.GetObjectType and f:GetObjectType() == "Frame" then
+        f:SetParent(Hider)
+    end
+    if f.Show then f.Show = function() end end
     f.isDead = true
 end
 
@@ -29,7 +29,7 @@ local function ApplySelectiveLockdown()
 
     MainMenuBar:ClearAllPoints()
     MainMenuBar:SetPoint("BOTTOM", UIParent, "BOTTOM", Config.MainBarOffset, Config.VerticalPadding)
-
+    
     if not MainMenuBar.isLobotomized then
         MainMenuBar.ClearAllPoints = function() end
         MainMenuBar.SetPoint = function() end
@@ -39,23 +39,19 @@ local function ApplySelectiveLockdown()
     if MultiBarBottomLeft then
         MultiBarBottomLeft:ClearAllPoints()
         MultiBarBottomLeft:SetPoint("BOTTOMLEFT", ActionButton1, "TOPLEFT", 0, Config.BarGap)
-
         if not MultiBarBottomLeft.isLobotomized then
             MultiBarBottomLeft.ClearAllPoints = function() end
             MultiBarBottomLeft.SetPoint = function() end
             MultiBarBottomLeft.isLobotomized = true
         end
     end
-
+    
     if MultiBarBottomRight then
+        local bar2Visible = MultiBarBottomLeft and MultiBarBottomLeft:IsShown()
+        local anchor = bar2Visible and MultiBarBottomLeft or ActionButton1
+        
         MultiBarBottomRight:ClearAllPoints()
-        MultiBarBottomRight:SetPoint("BOTTOMLEFT", MultiBarBottomLeft, "TOPLEFT", 0, Config.BarGap)
-
-        if not MultiBarBottomRight.isLobotomized then
-            MultiBarBottomRight.ClearAllPoints = function() end
-            MultiBarBottomRight.SetPoint = function() end
-            MultiBarBottomRight.isLobotomized = true
-        end
+        MultiBarBottomRight:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", 0, Config.BarGap)
     end
 
     if MainMenuBarPageNumber then
@@ -68,7 +64,7 @@ local function ApplySelectiveLockdown()
     if ActionBarUpButton then
         ActionBarUpButton:SetParent(MainMenuBar)
         ActionBarUpButton:ClearAllPoints()
-        ActionBarUpButton:SetPoint("BOTTOM", MainMenuBarPageNumber, "TOP", 0, 0)
+        ActionBarUpButton:SetPoint("BOTTOM", MainMenuBarPageNumber, "TOP", 0, 2)
         ActionBarUpButton:Show()
     end
 
@@ -78,44 +74,27 @@ local function ApplySelectiveLockdown()
         ActionBarDownButton:SetPoint("TOP", MainMenuBarPageNumber, "BOTTOM", 0, -2)
         ActionBarDownButton:Show()
     end
+
     isLocking = false
 end
 
 local function ApplyCleanSkin()
-    CleanUIPositions = CleanUIPositions or {}
-    if CleanUIPositions.MinimalistMode == nil then CleanUIPositions.MinimalistMode = false end
-
-    if Config.ForceThreeBars then
-        _G["SHOW_MULTI_ACTIONBAR_1"] = 1
-        _G["SHOW_MULTI_ACTIONBAR_2"] = 1
-        InterfaceOptions_UpdateMultiActionBars()
-    end
-
     if CleanUIPositions.MinimalistMode then
         UI.HaltModules = true
-
         Kill(MainMenuBarLeftEndCap)
         Kill(MainMenuBarRightEndCap)
-
-        return
+        return 
     end
 
     local framesToDisable = {
-        MainMenuBarOverlayFrame, MainMenuBarMaxLevelBar, MainMenuExpBar,
-        ReputationWatchBar, MainMenuBarPerformanceBarFrame, ExhaustionTick,
+        MainMenuBarOverlayFrame, MainMenuBarMaxLevelBar, MainMenuExpBar, 
+        ReputationWatchBar, MainMenuBarPerformanceBarFrame, ExhaustionTick, 
         MainMenuBarArtFrame, BonusActionBarFrame,
-        CharacterMicroButton, SpellbookMicroButton, TalentMicroButton, QuestLogMicroButton,
+        CharacterMicroButton, SpellbookMicroButton, TalentMicroButton, QuestLogMicroButton, 
         SocialsMicroButton, WorldMapMicroButton, MainMenuMicroButton, HelpMicroButton,
         MainMenuBarBackpackButton, CharacterBag0Slot, CharacterBag1Slot, CharacterBag2Slot, CharacterBag3Slot, KeyRingButton
     }
-
-    for _, f in ipairs(framesToDisable) do
-        if f then
-            f:UnregisterAllEvents()
-            f:Hide()
-            f:SetParent(Hider)
-        end
-    end
+    for _, f in ipairs(framesToDisable) do Kill(f) end
 
     local texturesToHide = {
         MainMenuBarTexture0, MainMenuBarTexture1, MainMenuBarTexture2, MainMenuBarTexture3,
@@ -123,18 +102,13 @@ local function ApplyCleanSkin()
         BonusActionBarTexture0, BonusActionBarTexture1,
         MainMenuBarLeftEndCap, MainMenuBarRightEndCap
     }
-    for _, tex in ipairs(texturesToHide) do
-        if tex then tex:Hide(); tex:SetAlpha(0) end
-    end
+    for _, tex in ipairs(texturesToHide) do Kill(tex) end
 
     ApplySelectiveLockdown()
 end
 
 F:SetScript("OnEvent", function(self, event)
-    if event == "PLAYER_LOGIN" or event == "PLAYER_ENTERING_WORLD" then
-        ApplyCleanSkin()
-        self:UnregisterEvent("PLAYER_LOGIN")
-    end
+    ApplyCleanSkin()
 end)
 
 hooksecurefunc("UIParent_ManageFramePositions", ApplySelectiveLockdown)
