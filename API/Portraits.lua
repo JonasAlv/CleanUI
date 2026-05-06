@@ -1,10 +1,18 @@
 local _, UI = ...
 
--- Ascension Round Icon Path
 UI.ClassPath = "Interface\\Glues\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES-ROUND"
 
+local isAscension = false
+local testTex = UIParent:CreateTexture(nil, "OVERLAY")
+testTex:SetTexture(UI.ClassPath)
+if testTex:GetWidth() > 0 then
+    isAscension = true
+end
+testTex:Hide()
+
 local classCoords = {
-    -- Standard WotLK Classes(from ascension round icons)
+    -- Ascension Round Icons
+    DRUID        = { 0.625, 0.75, 0, 0.25 },
     WARRIOR      = { 0.5, 0.625, 0.75, 1 },
     PALADIN      = { 0.625, 0.75, 0.25, 0.5 },
     HUNTER       = { 0.125, 0.25, 0.25, 0.5 },
@@ -14,8 +22,8 @@ local classCoords = {
     SHAMAN       = { 0.5, 0.625, 0.5, 0.75 },
     MAGE         = { 0.25, 0.375, 0.25, 0.5 },
     WARLOCK      = { 0.375, 0.5, 0.75, 1 },
-    DRUID        = { 0.625, 0.75, 0, 0.25 },
-    -- Ascension Custom Classes
+
+
     BARBARIAN    = { 0.0, 0.125, 0, 0.25 },
     REAPER       = { 0.25, 0.375, 0.5, 0.75 },
     CHRONOMANCER = { 0.125, 0.25, 0, 0.25 },
@@ -41,19 +49,19 @@ local classCoords = {
 }
 
 local fallbackCoords = {
-    WARRIOR     = { 0, 0.23, 0, 0.25 },
-    MAGE        = { 0.25, 0.48, 0, 0.25 },
-    ROGUE       = { 0.5, 0.73, 0, 0.25 },
-    DRUID       = { 0.75, 1, 0, 0.25 },
-    HUNTER      = { 0, 0.23, 0.25, 0.5 },
-    SHAMAN      = { 0.25, 0.48, 0.25, 0.5 },
-    PRIEST      = { 0.5, 0.73, 0.25, 0.5 },
-    WARLOCK     = { 0.75, 1, 0.25, 0.5 },
-    PALADIN     = { 0, 0.23, 0.5, 0.75 },
-    DEATHKNIGHT = { 0.25, 0.48, 0.5, 0.75 },
+    DRUID        = { 0.625, 0.75, 0, 0.25 },
+    WARRIOR      = { 0.5, 0.625, 0.75, 1 },
+    PALADIN      = { 0.625, 0.75, 0.25, 0.5 },
+    HUNTER       = { 0.125, 0.25, 0.25, 0.5 },
+    ROGUE        = { 0.375, 0.5, 0.5, 0.75 },
+    PRIEST       = { 0.75, 0.875, 0.25, 0.5 },
+    DEATHKNIGHT  = { 0.375, 0.5, 0, 0.25 },
+    SHAMAN       = { 0.5, 0.625, 0.5, 0.75 },
+    MAGE         = { 0.25, 0.375, 0.25, 0.5 },
+    WARLOCK      = { 0.375, 0.5, 0.75, 1 },
 }
 
-local defaultClassPath = "Interface\\TargetingFrame\\UI-Classes-Circles"
+local defaultClassPath = "Interface\\AddOns\\CleanUI\\Media\\classes.blp"
 local texturePathCache = {}
 
 local function GetClassTextureData(class)
@@ -61,13 +69,11 @@ local function GetClassTextureData(class)
         return texturePathCache[class].path, texturePathCache[class].coords
     end
     
-    -- PRIORITY 1: Custom Ascension Round Icons
-    if classCoords[class] and UI.ClassPath then
+    if isAscension and classCoords[class] then
         texturePathCache[class] = { path = UI.ClassPath, coords = classCoords[class] }
         return UI.ClassPath, classCoords[class]
     end
     
-    -- PRIORITY 2: Original WotLK Blizzard Fallback
     if fallbackCoords[class] then
         texturePathCache[class] = { path = defaultClassPath, coords = fallbackCoords[class] }
         return defaultClassPath, fallbackCoords[class]
@@ -91,7 +97,8 @@ function UI.SetClassPortrait(portrait, unit, forceClass)
     end
 
     local name = portrait:GetName() or ""
-    local parentName = portrait:GetParent() and portrait:GetParent():GetName() or ""
+    local parent = portrait:GetParent()
+    local parentName = parent and parent:GetName() or ""
 
     if parentName:find("MicroButton") or name:find("SideTab") or parentName:find("SideTab") then
         return false
@@ -106,6 +113,7 @@ function UI.SetClassPortrait(portrait, unit, forceClass)
 
     local isPet = (safeUnit and safeUnit:find("pet")) or name:find("Pet")
     local isPlayer = safeUnit and UnitIsPlayer(safeUnit) and not isPet
+    
     if not isPlayer then
         portrait:SetTexCoord(0, 1, 0, 1)
         return true
@@ -128,14 +136,19 @@ hooksecurefunc("SetPortraitTexture", function(portrait, unit)
 end)
 
 function UI.RefreshPortraits()
-    if PlayerPortrait then SetPortraitTexture(PlayerPortrait, "player") end
-    if TargetFramePortrait and UnitExists("target") then SetPortraitTexture(TargetFramePortrait, "target") end
-    if FocusFramePortrait and UnitExists("focus") then SetPortraitTexture(FocusFramePortrait, "focus") end
-    if TargetFrameToTPortrait and UnitExists("targettarget") then SetPortraitTexture(TargetFrameToTPortrait, "targettarget") end
-    if FocusFrameToTPortrait and UnitExists("focustarget") then SetPortraitTexture(FocusFrameToTPortrait, "focustarget") end
+    if PlayerPortrait then UI.SetClassPortrait(PlayerPortrait, "player") end
+    if TargetFramePortrait then UI.SetClassPortrait(TargetFramePortrait, "target") end
+    if FocusFramePortrait then UI.SetClassPortrait(FocusFramePortrait, "focus") end
+    if TargetFrameToTPortrait then UI.SetClassPortrait(TargetFrameToTPortrait, "targettarget") end
+    if FocusFrameToTPortrait then UI.SetClassPortrait(FocusFrameToTPortrait, "focustarget") end
+    
+    if CharacterFramePortrait then UI.SetClassPortrait(CharacterFramePortrait, "player") end
+    if InspectFramePortrait and InspectFrame.unit then 
+        UI.SetClassPortrait(InspectFramePortrait, InspectFrame.unit) 
+    end
 
     for i = 1, 4 do
         local p = _G["PartyMemberFrame"..i.."Portrait"]
-        if p and UnitExists("party"..i) then SetPortraitTexture(p, "party"..i) end
+        if p and UnitExists("party"..i) then UI.SetClassPortrait(p, "party"..i) end
     end
 end
