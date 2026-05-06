@@ -3,8 +3,46 @@ local _, UI = ...
 local standardClasses = {
     WARRIOR = true, PALADIN = true, HUNTER = true, ROGUE = true,
     PRIEST = true, DEATHKNIGHT = true, SHAMAN = true, MAGE = true,
-    WARLOCK = true, DRUID = true
+    WARLOCK = true, DRUID = true,
+    BARBARIAN = true, REAPER = true, CHRONOMANCER = true, CULTIST = true, DEMONHUNTER = true,
+    FLESHWARDEN = true, GUARDIAN = true, HERO = true, MONK = true, NECROMANCER = true, PROPHET = true, PYROMANCER = true,
+    RANGER = true, SONOFARUGAL = true, SPIRITMAGE = true, STARCALLER = true, STORMBRINGER = true, SUNCLERIC = true, TINKER = true, WILDWALKER = true, WITCHDOCTOR = true, WITCHHUNTER = true
 }
+
+local customClassColors = {
+    BARBARIAN = {0.78, 0.22, 0.18},
+    REAPER = {0.43, 0.30, 0.75},
+    CHRONOMANCER = {0.25, 0.50, 0.75},
+    CULTIST = {0.60, 0.20, 0.80},
+    FLESHWARDEN = {0.85, 0.35, 0.25},
+    GUARDIAN = {0.30, 0.60, 0.90},
+    HERO = {1.00, 0.80, 0.20},
+    NECROMANCER = {0.40, 0.15, 0.60},
+    PROPHET = {0.90, 0.85, 0.40},
+    PYROMANCER = {0.95, 0.45, 0.15},
+    RANGER = {0.35, 0.65, 0.25},
+    SONOFARUGAL = {0.20, 0.20, 0.20},
+    SPIRITMAGE = {0.60, 0.80, 0.95},
+    STARCALLER = {0.45, 0.35, 0.75},
+    STORMBRINGER = {0.50, 0.60, 0.75},
+    SUNCLERIC = {0.95, 0.85, 0.30},
+    TINKER = {0.70, 0.60, 0.40},
+    WILDWALKER = {0.25, 0.55, 0.15},
+    WITCHDOCTOR = {0.55, 0.25, 0.65},
+    WITCHHUNTER = {0.75, 0.15, 0.35},
+}
+
+local function GetClassColor(class)
+    local color = RAID_CLASS_COLORS[class]
+    if color then return color end
+
+    local custom = customClassColors[class]
+    if custom then
+        return { r = custom[1], g = custom[2], b = custom[3] }
+    end
+
+    return nil
+end
 
 UI.PlayerNameBG = nil
 local function CreatePlayerNameBackground()
@@ -20,7 +58,7 @@ local function CreatePlayerNameBackground()
         local _, class = UnitClass("player")
 
         if class and standardClasses[class] then
-            local color = RAID_CLASS_COLORS[class]
+            local color = GetClassColor(class)
             if color then
                 UI.PlayerNameBG:SetVertexColor(color.r, color.g, color.b, 1)
             end
@@ -85,7 +123,7 @@ function UI.ProtectFrame(healthBar)
             end
 
             if tClass and standardClasses[tClass] then
-                local color = RAID_CLASS_COLORS[tClass]
+                local color = GetClassColor(tClass)
                 if color then
                     self.isCleanUI_Updating = true
                     self:SetStatusBarColor(color.r, color.g, color.b)
@@ -133,7 +171,7 @@ function UI.ApplyClassTheme(unit, forceClass)
 
     local classToUse = forceClass or (UnitIsPlayer(safeUnit) and select(2, UnitClass(safeUnit)))
     if classToUse and standardClasses[classToUse] then
-        local color = RAID_CLASS_COLORS[classToUse]
+        local color = GetClassColor(classToUse)
         if color then
             if unit == "player" and UI.PlayerNameBG then
                 UI.PlayerNameBG:SetVertexColor(color.r, color.g, color.b, 1)
@@ -168,7 +206,7 @@ if TargetFrame_CheckFaction then
             local _, classToUse = UnitClass(safeUnit)
 
             if classToUse and standardClasses[classToUse] then
-                local color = RAID_CLASS_COLORS[classToUse]
+                local color = GetClassColor(classToUse)
                 if color then
                     self.nameBackground:SetVertexColor(color.r, color.g, color.b, 1)
                 end
