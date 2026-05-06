@@ -1,6 +1,5 @@
 local _, UI = ...
 
-UI.ClassPath = "Interface\\Glues\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES-ROUND"
 local Setup = CreateFrame("Frame")
 Setup:RegisterEvent("PLAYER_LOGIN")
 Setup:RegisterEvent("PLAYER_ENTERING_WORLD")

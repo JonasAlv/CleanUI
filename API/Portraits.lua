@@ -1,41 +1,45 @@
 local _, UI = ...
 
+-- Ascension Round Icon Path
+UI.ClassPath = "Interface\\Glues\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES-ROUND"
+
 local classCoords = {
-    WARRIOR = { 0.5, 0.625, 0.75, 1 },
-    PALADIN = { 0.625, 0.75, 0.25, 0.5 },
-    HUNTER = { 0.125, 0.25, 0.25, 0.5 },
-    ROGUE = { 0.375, 0.5, 0.5, 0.75 },
-    PRIEST = { 0.75, 0.875, 0.25, 0.5 },
-    DEATHKNIGHT = { 0.375, 0.5, 0, 0.25 },
-    SHAMAN = { 0.5, 0.625, 0.5, 0.75 },
-    MAGE = { 0.25, 0.375, 0.25, 0.5 },
-    WARLOCK = { 0.375, 0.5, 0.75, 1 },
-    DRUID = { 0.625, 0.75, 0, 0.25 },
-    BARBARIAN = { 0.0, 0.125, 0, 0.25 },
-    REAPER = { 0.25, 0.375, 0.5, 0.75 },
+    -- Standard WotLK Classes(from ascension round icons)
+    WARRIOR      = { 0.5, 0.625, 0.75, 1 },
+    PALADIN      = { 0.625, 0.75, 0.25, 0.5 },
+    HUNTER       = { 0.125, 0.25, 0.25, 0.5 },
+    ROGUE        = { 0.375, 0.5, 0.5, 0.75 },
+    PRIEST       = { 0.75, 0.875, 0.25, 0.5 },
+    DEATHKNIGHT  = { 0.375, 0.5, 0, 0.25 },
+    SHAMAN       = { 0.5, 0.625, 0.5, 0.75 },
+    MAGE         = { 0.25, 0.375, 0.25, 0.5 },
+    WARLOCK      = { 0.375, 0.5, 0.75, 1 },
+    DRUID        = { 0.625, 0.75, 0, 0.25 },
+    -- Ascension Custom Classes
+    BARBARIAN    = { 0.0, 0.125, 0, 0.25 },
+    REAPER       = { 0.25, 0.375, 0.5, 0.75 },
     CHRONOMANCER = { 0.125, 0.25, 0, 0.25 },
-    CULTIST = { 0.25, 0.375, 0, 0.25 },
-    DEMONHUNTER = { 0.5, 0.625, 0, 0.25 },
-    FLESHWARDEN = { 0.75, 0.875, 0, 0.25 },
-    GUARDIAN = { 0.875, 1, 0, 0.25 },
-    HERO = { 0, 0.125, 0.25, 0.5 },
-    MONK = { 0.375, 0.5, 0.25, 0.5 },
-    NECROMANCER = { 0.5, 0.625, 0.25, 0.5 },
-    PROPHET = { 0.875, 1, 0.25, 0.5 },
-    PYROMANCER = { 0, 0.125, 0.5, 0.75 },
-    RANGER = { 0.125, 0.25, 0.5, 0.75 },
-    SONOFARUGAL = { 0.625, 0.75, 0.5, 0.75 },
-    SPIRITMAGE = { 0.75, 0.875, 0.5, 0.75 },
-    STARCALLER = { 0.875, 1, 0.5, 0.75 },
+    CULTIST      = { 0.25, 0.375, 0, 0.25 },
+    DEMONHUNTER  = { 0.5, 0.625, 0, 0.25 },
+    FLESHWARDEN  = { 0.75, 0.875, 0, 0.25 },
+    GUARDIAN     = { 0.875, 1, 0, 0.25 },
+    HERO         = { 0, 0.125, 0.25, 0.5 },
+    MONK         = { 0.375, 0.5, 0.25, 0.5 },
+    NECROMANCER  = { 0.5, 0.625, 0.25, 0.5 },
+    PROPHET      = { 0.875, 1, 0.25, 0.5 },
+    PYROMANCER   = { 0, 0.125, 0.5, 0.75 },
+    RANGER       = { 0.125, 0.25, 0.5, 0.75 },
+    SONOFARUGAL  = { 0.625, 0.75, 0.5, 0.75 },
+    SPIRITMAGE   = { 0.75, 0.875, 0.5, 0.75 },
+    STARCALLER   = { 0.875, 1, 0.5, 0.75 },
     STORMBRINGER = { 0, 0.125, 0.75, 1 },
-    SUNCLERIC = { 0.125, 0.25, 0.75, 1 },
-    TINKER = { 0.25, 0.375, 0.75, 1 },
-    WILDWALKER = { 0.625, 0.75, 0.75, 1 },
-    WITCHDOCTOR = { 0.75, 0.875, 0.75, 1 },
-    WITCHHUNTER = { 0.875, 1, 0.75, 1 },
+    SUNCLERIC    = { 0.125, 0.25, 0.75, 1 },
+    TINKER       = { 0.25, 0.375, 0.75, 1 },
+    WILDWALKER   = { 0.625, 0.75, 0.75, 1 },
+    WITCHDOCTOR  = { 0.75, 0.875, 0.75, 1 },
+    WITCHHUNTER  = { 0.875, 1, 0.75, 1 },
 }
 
--- Fallback coordinates for standard WotLK classes using default texture
 local fallbackCoords = {
     WARRIOR     = { 0, 0.23, 0, 0.25 },
     MAGE        = { 0.25, 0.48, 0, 0.25 },
@@ -50,25 +54,23 @@ local fallbackCoords = {
 }
 
 local defaultClassPath = "Interface\\TargetingFrame\\UI-Classes-Circles"
-
 local texturePathCache = {}
 
--- Detect correct texture path
 local function GetClassTextureData(class)
     if texturePathCache[class] then
         return texturePathCache[class].path, texturePathCache[class].coords
     end
     
-    -- Standard WotLK classes
-    if fallbackCoords[class] then
-        texturePathCache[class] = { path = defaultClassPath, coords = fallbackCoords[class] }
-        return defaultClassPath, fallbackCoords[class]
-    end
-    
-    -- Ascension-only classes
+    -- PRIORITY 1: Custom Ascension Round Icons
     if classCoords[class] and UI.ClassPath then
         texturePathCache[class] = { path = UI.ClassPath, coords = classCoords[class] }
         return UI.ClassPath, classCoords[class]
+    end
+    
+    -- PRIORITY 2: Original WotLK Blizzard Fallback
+    if fallbackCoords[class] then
+        texturePathCache[class] = { path = defaultClassPath, coords = fallbackCoords[class] }
+        return defaultClassPath, fallbackCoords[class]
     end
 end
 
@@ -126,9 +128,7 @@ hooksecurefunc("SetPortraitTexture", function(portrait, unit)
 end)
 
 function UI.RefreshPortraits()
-
     if PlayerPortrait then SetPortraitTexture(PlayerPortrait, "player") end
-
     if TargetFramePortrait and UnitExists("target") then SetPortraitTexture(TargetFramePortrait, "target") end
     if FocusFramePortrait and UnitExists("focus") then SetPortraitTexture(FocusFramePortrait, "focus") end
     if TargetFrameToTPortrait and UnitExists("targettarget") then SetPortraitTexture(TargetFrameToTPortrait, "targettarget") end
