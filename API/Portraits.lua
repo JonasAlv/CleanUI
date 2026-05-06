@@ -1,17 +1,10 @@
 local _, UI = ...
 
 UI.ClassPath = "Interface\\Glues\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES-ROUND"
+local defaultClassPath = "Interface\\AddOns\\CleanUI\\Media\\classes.blp"
 
-local isAscension = false
-local testTex = UIParent:CreateTexture(nil, "OVERLAY")
-testTex:SetTexture(UI.ClassPath)
-if testTex:GetWidth() > 0 then
-    isAscension = true
-end
-testTex:Hide()
-
+-- Base Classes
 local classCoords = {
-    -- Ascension Round Icons
     DRUID        = { 0.625, 0.75, 0, 0.25 },
     WARRIOR      = { 0.5, 0.625, 0.75, 1 },
     PALADIN      = { 0.625, 0.75, 0.25, 0.5 },
@@ -22,8 +15,10 @@ local classCoords = {
     SHAMAN       = { 0.5, 0.625, 0.5, 0.75 },
     MAGE         = { 0.25, 0.375, 0.25, 0.5 },
     WARLOCK      = { 0.375, 0.5, 0.75, 1 },
+}
 
-
+-- Custom Classes
+local customClassCoords = {
     BARBARIAN    = { 0.0, 0.125, 0, 0.25 },
     REAPER       = { 0.25, 0.375, 0.5, 0.75 },
     CHRONOMANCER = { 0.125, 0.25, 0, 0.25 },
@@ -48,35 +43,28 @@ local classCoords = {
     WITCHHUNTER  = { 0.875, 1, 0.75, 1 },
 }
 
-local fallbackCoords = {
-    DRUID        = { 0.625, 0.75, 0, 0.25 },
-    WARRIOR      = { 0.5, 0.625, 0.75, 1 },
-    PALADIN      = { 0.625, 0.75, 0.25, 0.5 },
-    HUNTER       = { 0.125, 0.25, 0.25, 0.5 },
-    ROGUE        = { 0.375, 0.5, 0.5, 0.75 },
-    PRIEST       = { 0.75, 0.875, 0.25, 0.5 },
-    DEATHKNIGHT  = { 0.375, 0.5, 0, 0.25 },
-    SHAMAN       = { 0.5, 0.625, 0.5, 0.75 },
-    MAGE         = { 0.25, 0.375, 0.25, 0.5 },
-    WARLOCK      = { 0.375, 0.5, 0.75, 1 },
-}
-
-local defaultClassPath = "Interface\\AddOns\\CleanUI\\Media\\classes.blp"
-local texturePathCache = {}
+for class, coords in pairs(customClassCoords) do
+    local L, R, T, B = unpack(coords)
+    local wOffset = (R - L) * 0.05
+    local hOffset = (B - T) * 0.05
+    
+    customClassCoords[class] = { 
+        math.max(0, L - wOffset), 
+        math.min(1, R + wOffset), 
+        math.max(0, T - hOffset), 
+        math.min(1, B + hOffset) 
+    }
+end
 
 local function GetClassTextureData(class)
-    if texturePathCache[class] then
-        return texturePathCache[class].path, texturePathCache[class].coords
+    if not class then return end
+    
+    if classCoords[class] then
+        return defaultClassPath, classCoords[class]
     end
     
-    if isAscension and classCoords[class] then
-        texturePathCache[class] = { path = UI.ClassPath, coords = classCoords[class] }
-        return UI.ClassPath, classCoords[class]
-    end
-    
-    if fallbackCoords[class] then
-        texturePathCache[class] = { path = defaultClassPath, coords = fallbackCoords[class] }
-        return defaultClassPath, fallbackCoords[class]
+    if customClassCoords[class] then
+        return UI.ClassPath, customClassCoords[class]
     end
 end
 
