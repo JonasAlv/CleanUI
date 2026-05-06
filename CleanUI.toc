@@ -16,13 +16,10 @@ API\Theme.lua
 # 3. Load Modules
 modules\ActionBar.lua
 modules\Tooltip.lua
-modules\Player.lua
-modules\Target.lua
-modules\Focus.lua
 modules\Party.lua
 modules\Loot.lua
 modules\Options.lua
-modules\Chat.lua
+modules\UnitFrames.lua
 modules\MicroMenu.lua
 modules\PetBar.lua
 modules\StanceBar.lua

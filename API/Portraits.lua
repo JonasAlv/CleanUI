@@ -35,6 +35,43 @@ local classCoords = {
     WITCHHUNTER = { 0.875, 1, 0.75, 1 },
 }
 
+-- Fallback coordinates for standard WotLK classes using default texture
+local fallbackCoords = {
+    WARRIOR     = { 0, 0.23, 0, 0.25 },
+    MAGE        = { 0.25, 0.48, 0, 0.25 },
+    ROGUE       = { 0.5, 0.73, 0, 0.25 },
+    DRUID       = { 0.75, 1, 0, 0.25 },
+    HUNTER      = { 0, 0.23, 0.25, 0.5 },
+    SHAMAN      = { 0.25, 0.48, 0.25, 0.5 },
+    PRIEST      = { 0.5, 0.73, 0.25, 0.5 },
+    WARLOCK     = { 0.75, 1, 0.25, 0.5 },
+    PALADIN     = { 0, 0.23, 0.5, 0.75 },
+    DEATHKNIGHT = { 0.25, 0.48, 0.5, 0.75 },
+}
+
+local defaultClassPath = "Interface\\TargetingFrame\\UI-Classes-Circles"
+
+local texturePathCache = {}
+
+-- Detect correct texture path
+local function GetClassTextureData(class)
+    if texturePathCache[class] then
+        return texturePathCache[class].path, texturePathCache[class].coords
+    end
+    
+    -- Standard WotLK classes
+    if fallbackCoords[class] then
+        texturePathCache[class] = { path = defaultClassPath, coords = fallbackCoords[class] }
+        return defaultClassPath, fallbackCoords[class]
+    end
+    
+    -- Ascension-only classes
+    if classCoords[class] and UI.ClassPath then
+        texturePathCache[class] = { path = UI.ClassPath, coords = classCoords[class] }
+        return UI.ClassPath, classCoords[class]
+    end
+end
+
 local bypassSetPortrait = false
 
 function UI.SetClassPortrait(portrait, unit, forceClass)
@@ -73,9 +110,12 @@ function UI.SetClassPortrait(portrait, unit, forceClass)
     end
 
     local class = forceClass or select(2, UnitClass(safeUnit))
-    if class and classCoords[class] then
-        portrait:SetTexture(UI.ClassPath)
-        portrait:SetTexCoord(unpack(classCoords[class]))
+    if class then
+        local texturePath, texCoords = GetClassTextureData(class)
+        if texturePath and texCoords then
+            portrait:SetTexture(texturePath)
+            portrait:SetTexCoord(unpack(texCoords))
+        end
     end
 
     return true
