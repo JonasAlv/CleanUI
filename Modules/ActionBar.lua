@@ -14,17 +14,20 @@ local isLocking = false
 
 local function Kill(f)
     if not f or f.isDead then return end
+    
     f:Hide()
+    if f.UnregisterAllEvents then f:UnregisterAllEvents() end -- Stop logic without taint
     if f.SetAlpha then f:SetAlpha(0) end
-    if f.SetParent and f.GetObjectType and f:GetObjectType() == "Frame" then
+    
+    if f.SetParent and f:GetObjectType() == "Frame" then
         f:SetParent(Hider)
     end
-    if f.Show then f.Show = function() end end
+    
     f.isDead = true
 end
 
 local function ApplySelectiveLockdown()
-    if CleanUIPositions.MinimalistMode or InCombatLockdown() or isLocking then return end
+    if (CleanUIPositions and CleanUIPositions.MinimalistMode) or InCombatLockdown() or isLocking then return end
     isLocking = true
 
     MainMenuBar:ClearAllPoints()
@@ -34,6 +37,29 @@ local function ApplySelectiveLockdown()
         MainMenuBar.ClearAllPoints = function() end
         MainMenuBar.SetPoint = function() end
         MainMenuBar.isLobotomized = true
+    end
+
+    if BonusActionBarFrame then
+        BonusActionBarFrame:ClearAllPoints()
+        BonusActionBarFrame:SetPoint("BOTTOM", MainMenuBar, "BOTTOM", 0, 0)
+    end
+
+    for i = 1, 12 do
+        local mainBtn = _G["ActionButton"..i]
+        local bonusBtn = _G["BonusActionButton"..i]
+        
+        if mainBtn then
+            mainBtn:SetAttribute("showgrid", 1)
+            ActionButton_ShowGrid(mainBtn)
+        end
+        
+        if bonusBtn then
+            bonusBtn:SetAttribute("showgrid", 1)
+            ActionButton_ShowGrid(bonusBtn)
+            -- Position bonus buttons to match main buttons
+            bonusBtn:ClearAllPoints()
+            bonusBtn:SetPoint("CENTER", mainBtn, "CENTER", 0, 0)
+        end
     end
 
     if MultiBarBottomLeft then
@@ -48,38 +74,17 @@ local function ApplySelectiveLockdown()
     
     if MultiBarBottomRight then
         local bar2Visible = MultiBarBottomLeft and MultiBarBottomLeft:IsShown()
-        local anchor = bar2Visible and MultiBarBottomLeft or ActionButton1
+        local anchor = bar2Visible and MultiBarBottomLeftButton1 or ActionButton1
         
         MultiBarBottomRight:ClearAllPoints()
         MultiBarBottomRight:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", 0, Config.BarGap)
-    end
-
-    if MainMenuBarPageNumber then
-        MainMenuBarPageNumber:SetParent(MainMenuBar)
-        MainMenuBarPageNumber:ClearAllPoints()
-        MainMenuBarPageNumber:SetPoint("LEFT", ActionButton12, "RIGHT", 12, 0)
-        MainMenuBarPageNumber:Show()
-    end
-
-    if ActionBarUpButton then
-        ActionBarUpButton:SetParent(MainMenuBar)
-        ActionBarUpButton:ClearAllPoints()
-        ActionBarUpButton:SetPoint("BOTTOM", MainMenuBarPageNumber, "TOP", 0, 2)
-        ActionBarUpButton:Show()
-    end
-
-    if ActionBarDownButton then
-        ActionBarDownButton:SetParent(MainMenuBar)
-        ActionBarDownButton:ClearAllPoints()
-        ActionBarDownButton:SetPoint("TOP", MainMenuBarPageNumber, "BOTTOM", 0, -2)
-        ActionBarDownButton:Show()
     end
 
     isLocking = false
 end
 
 local function ApplyCleanSkin()
-    if CleanUIPositions.MinimalistMode then
+    if CleanUIPositions and CleanUIPositions.MinimalistMode then
         UI.HaltModules = true
         Kill(MainMenuBarLeftEndCap)
         Kill(MainMenuBarRightEndCap)
@@ -89,7 +94,7 @@ local function ApplyCleanSkin()
     local framesToDisable = {
         MainMenuBarOverlayFrame, MainMenuBarMaxLevelBar, MainMenuExpBar, 
         ReputationWatchBar, MainMenuBarPerformanceBarFrame, ExhaustionTick, 
-        MainMenuBarArtFrame, BonusActionBarFrame,
+        MainMenuBarArtFrame, 
         CharacterMicroButton, SpellbookMicroButton, TalentMicroButton, QuestLogMicroButton, 
         SocialsMicroButton, WorldMapMicroButton, MainMenuMicroButton, HelpMicroButton,
         MainMenuBarBackpackButton, CharacterBag0Slot, CharacterBag1Slot, CharacterBag2Slot, CharacterBag3Slot, KeyRingButton
@@ -106,6 +111,20 @@ local function ApplyCleanSkin()
 
     ApplySelectiveLockdown()
 end
+
+hooksecurefunc("ShowBonusActionBar", function()
+    for i = 1, 12 do
+        local btn = _G["ActionButton"..i]
+        if btn then btn:SetAlpha(0) end -- Use Alpha to avoid potential secure header taint
+    end
+end)
+
+hooksecurefunc("HideBonusActionBar", function()
+    for i = 1, 12 do
+        local btn = _G["ActionButton"..i]
+        if btn then btn:SetAlpha(1) end
+    end
+end)
 
 F:SetScript("OnEvent", function(self, event)
     ApplyCleanSkin()

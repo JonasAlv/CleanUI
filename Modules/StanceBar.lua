@@ -6,29 +6,50 @@ F:RegisterEvent("PLAYER_ENTERING_WORLD")
 local Hider = CreateFrame("Frame", "CleanUIStanceHider", UIParent):Hide()
 local isLocking = false
 
+local function Kill(f)
+    if not f or f.isDead then return end
+    f:Hide()
+    if f.UnregisterAllEvents then f:UnregisterAllEvents() end 
+    if f.SetAlpha then f:SetAlpha(0) end
+    if f.SetParent and f:GetObjectType() == "Frame" then
+        f:SetParent(Hider)
+    end
+    f.isDead = true
+end
+
+local function Lobotomize(f)
+    if not f or f.isLobotomized then return end
+    f.OrigSetPoint = f.SetPoint
+    f.OrigClearAllPoints = f.ClearAllPoints
+    f.SetPoint = function() end
+    f.ClearAllPoints = function() end
+    f.isLobotomized = true
+end
+
 local function ApplyStanceBarLockdown()
-    if not CleanUIPositions or CleanUIPositions.MinimalistMode or InCombatLockdown() or isLocking then return end
+    if (CleanUIPositions and CleanUIPositions.MinimalistMode) or InCombatLockdown() or isLocking then return end
     isLocking = true
     
     local anchor = _G["CleanUIStanceBarAnchor"]
     if not anchor then isLocking = false; return end
 
-    if not CleanUIPositions["StanceBarAnchor"] then
-        anchor:ClearAllPoints()
-        
-        local floorButton
-        if MultiBarBottomRight and MultiBarBottomRight:IsShown() then
-            floorButton = MultiBarBottomRightButton1
-        elseif MultiBarBottomLeft and MultiBarBottomLeft:IsShown() then
-            floorButton = MultiBarBottomLeftButton1
+    local floorButton
+    if MultiBarBottomRight and MultiBarBottomRight:IsVisible() then
+        floorButton = MultiBarBottomRightButton1
+    elseif MultiBarBottomLeft and MultiBarBottomLeft:IsVisible() then
+        floorButton = MultiBarBottomLeftButton1
+    else
+        floorButton = ActionButton1
+    end
+
+    if anchor and floorButton then
+        if anchor.isLobotomized then
+            anchor:OrigClearAllPoints()
+            anchor:OrigSetPoint("BOTTOMLEFT", floorButton, "TOPLEFT", 0, 4)
         else
-            floorButton = ActionButton1
-        end
-        
-        if floorButton then
+            anchor:ClearAllPoints()
             anchor:SetPoint("BOTTOMLEFT", floorButton, "TOPLEFT", 0, 4)
-        else
-            anchor:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 10, 110)
+            Lobotomize(anchor)
         end
     end
 
@@ -49,7 +70,7 @@ local function ApplyStanceBarLockdown()
 end
 
 local function InitStanceBar()
-    if CleanUIPositions.MinimalistMode then return end
+    if CleanUIPositions and CleanUIPositions.MinimalistMode then return end
 
     local anchor = _G["CleanUIStanceBarAnchor"] or CreateFrame("Frame", "CleanUIStanceBarAnchor", UIParent)
     anchor:SetSize(30, 30)
@@ -58,20 +79,17 @@ local function InitStanceBar()
         UI.MakeMovableAndSave(anchor, "StanceBarAnchor") 
     end
 
-    for i = 1, 10 do
-        local btn = _G["ShapeshiftButton"..i]
-        if btn then
-            btn:SetParent(anchor) 
-        end
+    if ShapeshiftBarFrame then
+        ShapeshiftBarFrame.ignoreFramePositionManager = true
+        Kill(ShapeshiftBarFrame)
     end
 
-    if ShapeshiftBarFrame then
-        ShapeshiftBarFrame:SetParent(Hider)
+    for i = 1, 10 do
+        local btn = _G["ShapeshiftButton"..i]
+        if btn then btn:SetParent(anchor) end
     end
-    
-    local texturesToHide = {
-        ShapeshiftBarLeft, ShapeshiftBarMiddle, ShapeshiftBarRight
-    }
+
+    local texturesToHide = { ShapeshiftBarLeft, ShapeshiftBarMiddle, ShapeshiftBarRight }
     for _, tex in ipairs(texturesToHide) do
         if tex then tex:Hide(); tex:SetAlpha(0) end
     end
@@ -85,14 +103,6 @@ F:SetScript("OnEvent", function(self, event)
     end
 end)
 
-if MultiBarBottomLeft then
-    MultiBarBottomLeft:HookScript("OnShow", ApplyStanceBarLockdown)
-    MultiBarBottomLeft:HookScript("OnHide", ApplyStanceBarLockdown)
-end
-if MultiBarBottomRight then
-    MultiBarBottomRight:HookScript("OnShow", ApplyStanceBarLockdown)
-    MultiBarBottomRight:HookScript("OnHide", ApplyStanceBarLockdown)
-end
-
 hooksecurefunc("UIParent_ManageFramePositions", ApplyStanceBarLockdown)
+hooksecurefunc("MultiActionBar_Update", ApplyStanceBarLockdown)
 hooksecurefunc("ShapeshiftBar_Update", ApplyStanceBarLockdown)

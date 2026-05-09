@@ -5,33 +5,45 @@ F:RegisterEvent("PLAYER_ENTERING_WORLD")
 local Hider = _G["CleanUIHider"] or CreateFrame("Frame", "CleanUITotemHider", UIParent):Hide()
 local isLocking = false
 
+local function Lobotomize(f)
+    if not f or f.isLobotomized then return end
+    f.OrigSetPoint = f.SetPoint
+    f.OrigClearAllPoints = f.ClearAllPoints
+    f.SetPoint = function() end
+    f.ClearAllPoints = function() end
+    f.isLobotomized = true
+end
+
+local function GetTotemFloor()
+    if CleanUIPetBarAnchor and CleanUIPetBarAnchor:IsVisible() then
+        return _G["PetActionButton1"]
+    elseif CleanUIStanceBarAnchor and CleanUIStanceBarAnchor:IsVisible() then
+        return _G["ShapeshiftButton1"]
+    elseif MultiBarBottomRight and MultiBarBottomRight:IsVisible() then
+        return _G["MultiBarBottomRightButton1"]
+    elseif MultiBarBottomLeft and MultiBarBottomLeft:IsVisible() then
+        return _G["MultiBarBottomLeftButton1"]
+    end
+    return _G["ActionButton1"]
+end
+
 local function EnforceTotemPosition()
-    if not CleanUIPositions or CleanUIPositions.MinimalistMode or InCombatLockdown() or isLocking then return end
+    if (CleanUIPositions and CleanUIPositions.MinimalistMode) or InCombatLockdown() or isLocking then return end
     isLocking = true
 
     local anchor = _G["CleanUITotemBarAnchor"]
     if not anchor then isLocking = false; return end
 
-    if not CleanUIPositions["TotemBarAnchor"] then
-        anchor:ClearAllPoints()
+    local floorFrame = GetTotemFloor()
 
-        local floorFrame
-        if CleanUIStanceBarAnchor and CleanUIStanceBarAnchor:IsShown() then
-            floorFrame = ShapeshiftButton1
-        elseif CleanUIPetBarAnchor and CleanUIPetBarAnchor:IsShown() then
-             floorFrame = PetActionButton1
-        elseif MultiBarBottomRight and MultiBarBottomRight:IsShown() then
-            floorFrame = MultiBarBottomRightButton1
-        elseif MultiBarBottomLeft and MultiBarBottomLeft:IsShown() then
-            floorFrame = MultiBarBottomLeftButton1
+    if anchor and floorFrame then
+        if anchor.isLobotomized then
+            anchor:OrigClearAllPoints()
+            anchor:OrigSetPoint("BOTTOMLEFT", floorFrame, "TOPLEFT", 0, 10)
         else
-            floorFrame = ActionButton1
-        end
-
-        if floorFrame then
+            anchor:ClearAllPoints()
             anchor:SetPoint("BOTTOMLEFT", floorFrame, "TOPLEFT", 0, 10)
-        else
-            anchor:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 10, 180)
+            Lobotomize(anchor)
         end
     end
     
@@ -41,8 +53,7 @@ end
 local function ApplyTotemBarSkin()
     local _, class = UnitClass("player")
     if class ~= "SHAMAN" then return end
-
-    if CleanUIPositions.MinimalistMode then return end
+    if CleanUIPositions and CleanUIPositions.MinimalistMode then return end
 
     local totemAnchor = _G["CleanUITotemBarAnchor"] or CreateFrame("Frame", "CleanUITotemBarAnchor", UIParent)
     totemAnchor:SetSize(220, 40)
@@ -69,6 +80,7 @@ local function ApplyTotemBarSkin()
     for _, btn in ipairs(buttons) do
         if btn then
             btn:SetParent(totemAnchor)
+            
             btn:ClearAllPoints()
             if not prev then
                 btn:SetPoint("BOTTOMLEFT", totemAnchor, "BOTTOMLEFT", 0, 0)
@@ -89,18 +101,8 @@ end
 F:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_ENTERING_WORLD" then
         ApplyTotemBarSkin()
-        self:UnregisterEvent("PLAYER_ENTERING_WORLD")
     end
 end)
-
-if MultiBarBottomLeft then
-    MultiBarBottomLeft:HookScript("OnShow", EnforceTotemPosition)
-    MultiBarBottomLeft:HookScript("OnHide", EnforceTotemPosition)
-end
-if MultiBarBottomRight then
-    MultiBarBottomRight:HookScript("OnShow", EnforceTotemPosition)
-    MultiBarBottomRight:HookScript("OnHide", EnforceTotemPosition)
-end
 
 hooksecurefunc("MultiActionBar_Update", EnforceTotemPosition)
 hooksecurefunc("UIParent_ManageFramePositions", EnforceTotemPosition)

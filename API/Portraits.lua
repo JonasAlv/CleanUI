@@ -1,8 +1,8 @@
 local _, UI = ...
 
 UI.ClassPath = "Interface\\Glues\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES-ROUND"
-local defaultClassPath = "Interface\\AddOns\\CleanUI\\Media\\classes.blp"
-
+local defaultClassPath = "Interface\\AddOns\\CleanUI\\Media\\classes.blp" -- for base classes i get from a local blp
+-- all coords i got from the atlas
 -- Base Classes
 local classCoords = {
     DRUID        = { 0.625, 0.75, 0, 0.25 },
@@ -43,18 +43,23 @@ local customClassCoords = {
     WITCHHUNTER  = { 0.875, 1, 0.75, 1 },
 }
 
-for class, coords in pairs(customClassCoords) do
-    local L, R, T, B = unpack(coords)
-    local wOffset = (R - L) * 0.05
-    local hOffset = (B - T) * 0.05
-    
-    customClassCoords[class] = { 
-        math.max(0, L - wOffset), 
-        math.min(1, R + wOffset), 
-        math.max(0, T - hOffset), 
-        math.min(1, B + hOffset) 
-    }
-end
+-- local zoom = 0.04
+
+-- local tablesToZoom = { classCoords, customClassCoords }
+
+-- for _, classTable in ipairs(tablesToZoom) do
+--     for class, coords in pairs(classTable) do
+--         local L, R, T, B = unpack(coords)
+--         local w, h = (R - L), (B - T)
+        
+--         classTable[class] = { 
+--             math.max(0, L - (w * zoom)), 
+--             math.min(1, R + (w * zoom)), 
+--             math.max(0, T - (h * zoom)), 
+--             math.min(1, B + (h * zoom)) 
+--         }
+--     end
+-- end
 
 local function GetClassTextureData(class)
     if not class then return end
@@ -69,6 +74,8 @@ local function GetClassTextureData(class)
 end
 
 local bypassSetPortrait = false
+
+local zoom = 0.04
 
 function UI.SetClassPortrait(portrait, unit, forceClass)
     if type(portrait) == "string" then portrait = _G[portrait] end
@@ -112,7 +119,21 @@ function UI.SetClassPortrait(portrait, unit, forceClass)
         local texturePath, texCoords = GetClassTextureData(class)
         if texturePath and texCoords then
             portrait:SetTexture(texturePath)
-            portrait:SetTexCoord(unpack(texCoords))
+
+
+            if parentName:find("ToT") then
+                portrait:SetTexCoord(unpack(texCoords))
+            else
+                local L, R, T, B = unpack(texCoords)
+                local w, h = (R - L), (B - T)
+                
+                portrait:SetTexCoord(
+                    math.max(0, L - (w * zoom)), 
+                    math.min(1, R + (w * zoom)), 
+                    math.max(0, T - (h * zoom)), 
+                    math.min(1, B + (h * zoom))
+                )
+            end
         end
     end
 
