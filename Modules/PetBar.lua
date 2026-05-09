@@ -2,7 +2,6 @@ local _, UI = ...
 local F = CreateFrame("Frame")
 F:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-local Hider = _G["CleanUIHider"] or CreateFrame("Frame", "CleanUIPetHider", UIParent):Hide()
 local isLocking = false
 
 local function Lobotomize(f)
@@ -14,45 +13,19 @@ local function Lobotomize(f)
     f.isLobotomized = true
 end
 
-local function GetAnchorFloor()
-    if CleanUIStanceBarAnchor and CleanUIStanceBarAnchor:IsVisible() then
-        return _G["ShapeshiftButton1"]
-    elseif MultiBarBottomRight and MultiBarBottomRight:IsVisible() then
-        return _G["MultiBarBottomRightButton1"]
-    elseif MultiBarBottomLeft and MultiBarBottomLeft:IsVisible() then
-        return _G["MultiBarBottomLeftButton1"]
-    end
-    return _G["ActionButton1"]
-end
-
 local function ApplyPetBarLockdown()
     if (CleanUIPositions and CleanUIPositions.MinimalistMode) or InCombatLockdown() or isLocking then return end
     isLocking = true
     
-    local anchor = _G["CleanUIPetBarAnchor"]
-    if not anchor then isLocking = false; return end
-
-    local floorFrame = GetAnchorFloor()
-    
-    if anchor and floorFrame then
-        if anchor.isLobotomized then
-            anchor:OrigClearAllPoints()
-            anchor:OrigSetPoint("BOTTOMLEFT", floorFrame, "TOPLEFT", 0, 4)
-        else
-            anchor:ClearAllPoints()
-            anchor:SetPoint("BOTTOMLEFT", floorFrame, "TOPLEFT", 0, 4)
-            Lobotomize(anchor)
-        end
-    end
-
-    for i = 1, 10 do
-        local btn = _G["PetActionButton"..i]
-        if btn then
-            btn:ClearAllPoints()
-            if i == 1 then
-                btn:SetPoint("BOTTOMLEFT", anchor, "BOTTOMLEFT", 0, 0)
+    local frame = PetActionBarFrame
+    if frame then
+        if frame.isLobotomized then
+            local p = CleanUIPositions["PetBar"]
+            frame:OrigClearAllPoints()
+            if p then
+                frame:OrigSetPoint(p.pt, UIParent, p.rel, p.x, p.y)
             else
-                btn:SetPoint("LEFT", _G["PetActionButton"..(i-1)], "RIGHT", 6, 0)
+                frame:OrigSetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 280, 5)
             end
         end
     end
@@ -61,30 +34,20 @@ end
 
 local function InitPetBar()
     if CleanUIPositions and CleanUIPositions.MinimalistMode then return end
+    if not PetActionBarFrame then return end
 
-    local petAnchor = _G["CleanUIPetBarAnchor"] or CreateFrame("Frame", "CleanUIPetBarAnchor", UIParent, "SecureHandlerStateTemplate")
-    petAnchor:SetSize(350, 35)
+    PetActionBarFrame.ignoreFramePositionManager = true
+    local art = {SlidingActionBarTexture0, SlidingActionBarTexture1}
+    for _, tex in ipairs(art) do if tex then tex:Hide(); tex:SetAlpha(0) end end
 
-    if UI.MakeMovableAndSave then
-        UI.MakeMovableAndSave(petAnchor, "PetBarAnchor")
+    UI.MakeMovableAndSave(PetActionBarFrame, "PetBar")
+
+    if not CleanUIPositions["PetBar"] then
+        PetActionBarFrame:ClearAllPoints()
+        PetActionBarFrame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 280, 5)
     end
 
-    if PetActionBarFrame then
-        PetActionBarFrame:SetParent(Hider)
-        PetActionBarFrame.ignoreFramePositionManager = true 
-    end
-
-    local artFrames = {SlidingActionBarTexture0, SlidingActionBarTexture1}
-    for _, frame in ipairs(artFrames) do
-        if frame then frame:Hide(); frame:SetAlpha(0) end
-    end
-
-    for i = 1, 10 do
-        local btn = _G["PetActionButton"..i]
-        if btn then btn:SetParent(petAnchor) end
-    end
-
-    RegisterStateDriver(petAnchor, "visibility", "[pet] show; hide")
+    Lobotomize(PetActionBarFrame)
     ApplyPetBarLockdown()
 end
 
@@ -93,4 +56,3 @@ F:SetScript("OnEvent", function(self, event)
 end)
 
 hooksecurefunc("UIParent_ManageFramePositions", ApplyPetBarLockdown)
-hooksecurefunc("ShapeshiftBar_Update", ApplyPetBarLockdown)
