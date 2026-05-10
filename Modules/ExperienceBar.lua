@@ -63,11 +63,11 @@ local function UpdateBar()
             restBar:Show()
             restBar:SetMinMaxValues(0, maxXP)
             restBar:SetValue(curXP + restedXP)
-            bar:SetStatusBarColor(0.0, 0.39, 0.88) -- Blue (Rested)
+            bar:SetStatusBarColor(0.0, 0.39, 0.88) 
             bar.text:SetText(format("%s / %s (+%s) [%d%%]", FormatNum(curXP), FormatNum(maxXP), FormatNum(restedXP), math.floor((curXP / maxXP) * 100)))
         else
             restBar:Hide()
-            bar:SetStatusBarColor(0.58, 0.0, 0.55) -- Purple (Normal)
+            bar:SetStatusBarColor(0.58, 0.0, 0.55) 
             bar.text:SetText(format("%s / %s [%d%%]", FormatNum(curXP), FormatNum(maxXP), math.floor((curXP / maxXP) * 100)))
         end
 
@@ -90,21 +90,27 @@ local function CreateBar()
     restBar = CreateFrame("StatusBar", nil, bar)
     restBar:SetAllPoints(bar)
     restBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
-    restBar:SetStatusBarColor(0, 0.4, 0.8, 0.5) 
+    restBar:SetStatusBarColor(0, 0.4, 0.8, 0.4) 
     restBar:SetFrameLevel(bar:GetFrameLevel() - 1)
 
     local bg = bar:CreateTexture(nil, "BACKGROUND")
     bg:SetPoint("TOPLEFT", -1, 1); bg:SetPoint("BOTTOMRIGHT", 1, -1)
-    bg:SetTexture(0, 0, 0, 0.8)
+    bg:SetTexture(0.03, 0.03, 0.03, 0.5)
 
     for i = 1, 9 do
         local t = bar:CreateTexture(nil, "OVERLAY")
-        t:SetTexture(0, 0, 0, 0.5)
+        t:SetTexture(0, 0, 0, 1) 
         t:SetWidth(1)
         t:SetHeight(bar:GetHeight())
-        t:SetPoint("LEFT", bar, "LEFT", (i * (498 / 10)), 0) 
+        
+        local function UpdateMarkerPos()
+            t:SetPoint("LEFT", bar, "LEFT", (i * (bar:GetWidth() / 10)), 0)
+        end
+        UpdateMarkerPos()
+        bar:HookScript("OnSizeChanged", UpdateMarkerPos)
     end
 
+    -- Text
     bar.text = bar:CreateFontString(nil, "OVERLAY")
     bar.text:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
     bar.text:SetPoint("CENTER", bar, "CENTER", 0, 0)
