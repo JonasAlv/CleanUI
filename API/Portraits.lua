@@ -1,9 +1,10 @@
 local _, UI = ...
 
 UI.ClassPath = "Interface\\Glues\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES-ROUND"
-local defaultClassPath = "Interface\\AddOns\\CleanUI\\Media\\classes.blp" -- for base classes i get from a local blp
--- all coords i got from the atlas
--- Base Classes
+local defaultClassPath = "Interface\\AddOns\\CleanUI\\Media\\classes.blp"
+local bypassSetPortrait = false
+local zoom = 0.04 
+
 local classCoords = {
     DRUID        = { 0.625, 0.75, 0, 0.25 },
     WARRIOR      = { 0.5, 0.625, 0.75, 1 },
@@ -17,7 +18,6 @@ local classCoords = {
     WARLOCK      = { 0.375, 0.5, 0.75, 1 },
 }
 
--- Custom Classes
 local customClassCoords = {
     BARBARIAN    = { 0.0, 0.125, 0, 0.25 },
     REAPER       = { 0.25, 0.375, 0.5, 0.75 },
@@ -43,46 +43,23 @@ local customClassCoords = {
     WITCHHUNTER  = { 0.875, 1, 0.75, 1 },
 }
 
--- local zoom = 0.04
-
--- local tablesToZoom = { classCoords, customClassCoords }
-
--- for _, classTable in ipairs(tablesToZoom) do
---     for class, coords in pairs(classTable) do
---         local L, R, T, B = unpack(coords)
---         local w, h = (R - L), (B - T)
-        
---         classTable[class] = { 
---             math.max(0, L - (w * zoom)), 
---             math.min(1, R + (w * zoom)), 
---             math.max(0, T - (h * zoom)), 
---             math.min(1, B + (h * zoom)) 
---         }
---     end
--- end
-
 local function GetClassTextureData(class)
     if not class then return end
-    
     if classCoords[class] then
         return defaultClassPath, classCoords[class]
     end
-    
     if customClassCoords[class] then
         return UI.ClassPath, customClassCoords[class]
     end
 end
 
-local bypassSetPortrait = false
-
-local zoom = 0.04
-
-function UI.SetClassPortrait(portrait, unit, forceClass)
+function UI.SetClassPortrait(portrait, unit)
     if type(portrait) == "string" then portrait = _G[portrait] end
-    if not portrait then return false end
+    if not portrait or not unit then return false end
 
-    if CleanUI_UseClassPortraits == false then
-        if not bypassSetPortrait and unit then
+    local isPet = UnitIsUnit(unit, "pet") or UnitIsUnit(unit, "partypet")
+    if CleanUI_UseClassPortraits == false or not UnitIsPlayer(unit) or isPet then
+        if not bypassSetPortrait then
             bypassSetPortrait = true
             SetPortraitTexture(portrait, unit)
             bypassSetPortrait = false
@@ -94,34 +71,17 @@ function UI.SetClassPortrait(portrait, unit, forceClass)
     local name = portrait:GetName() or ""
     local parent = portrait:GetParent()
     local parentName = parent and parent:GetName() or ""
-
     if parentName:find("MicroButton") or name:find("SideTab") or parentName:find("SideTab") then
         return false
     end
 
-    local safeUnit = unit
-    if unit then
-        if UnitIsUnit(unit, "player") then safeUnit = "player"
-        elseif UnitIsUnit(unit, "target") then safeUnit = "target"
-        elseif UnitIsUnit(unit, "focus") then safeUnit = "focus" end
-    end
-
-    local isPet = (safeUnit and safeUnit:find("pet")) or name:find("Pet")
-    local isPlayer = safeUnit and UnitIsPlayer(safeUnit) and not isPet
-    
-    if not isPlayer then
-        portrait:SetTexCoord(0, 1, 0, 1)
-        return true
-    end
-
-    local class = forceClass or select(2, UnitClass(safeUnit))
+    local _, class = UnitClass(unit)
     if class then
         local texturePath, texCoords = GetClassTextureData(class)
         if texturePath and texCoords then
             portrait:SetTexture(texturePath)
 
-
-            if parentName:find("ToT") then
+            if parentName:find("ToT") or parentName:find("TargetTarget") then
                 portrait:SetTexCoord(unpack(texCoords))
             else
                 local L, R, T, B = unpack(texCoords)
@@ -145,19 +105,30 @@ hooksecurefunc("SetPortraitTexture", function(portrait, unit)
 end)
 
 function UI.RefreshPortraits()
-    if PlayerPortrait then UI.SetClassPortrait(PlayerPortrait, "player") end
-    if TargetFramePortrait then UI.SetClassPortrait(TargetFramePortrait, "target") end
-    if FocusFramePortrait then UI.SetClassPortrait(FocusFramePortrait, "focus") end
-    if TargetFrameToTPortrait then UI.SetClassPortrait(TargetFrameToTPortrait, "targettarget") end
-    if FocusFrameToTPortrait then UI.SetClassPortrait(FocusFrameToTPortrait, "focustarget") end
-    
-    if CharacterFramePortrait then UI.SetClassPortrait(CharacterFramePortrait, "player") end
+    local portraits = {
+        ["player"] = PlayerPortrait,
+        ["target"] = TargetFramePortrait,
+        ["focus"] = FocusFramePortrait,
+        ["targettarget"] = TargetFrameToTPortrait,
+        ["focustarget"] = FocusFrameToTPortrait,
+        ["player_frame"] = CharacterFramePortrait,
+    }
+
+    for unit, portrait in pairs(portraits) do
+        if portrait then 
+            local safeUnit = (unit == "player_frame") and "player" or unit
+            UI.SetClassPortrait(portrait, safeUnit) 
+        end
+    end
+
     if InspectFramePortrait and InspectFrame.unit then 
         UI.SetClassPortrait(InspectFramePortrait, InspectFrame.unit) 
     end
 
     for i = 1, 4 do
         local p = _G["PartyMemberFrame"..i.."Portrait"]
-        if p and UnitExists("party"..i) then UI.SetClassPortrait(p, "party"..i) end
+        if p and UnitExists("party"..i) then 
+            UI.SetClassPortrait(p, "party"..i) 
+        end
     end
 end
