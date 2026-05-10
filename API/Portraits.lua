@@ -3,7 +3,6 @@ local _, UI = ...
 UI.ClassPath = "Interface\\Glues\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES-ROUND"
 local defaultClassPath = "Interface\\AddOns\\CleanUI\\Media\\classes.blp"
 local bypassSetPortrait = false
-local zoom = 0.04 
 
 local classCoords = {
     DRUID        = { 0.625, 0.75, 0, 0.25 },
@@ -19,38 +18,23 @@ local classCoords = {
 }
 
 local customClassCoords = {
-    BARBARIAN    = { 0.0, 0.125, 0, 0.25 },
-    REAPER       = { 0.25, 0.375, 0.5, 0.75 },
-    CHRONOMANCER = { 0.125, 0.25, 0, 0.25 },
-    CULTIST      = { 0.25, 0.375, 0, 0.25 },
-    DEMONHUNTER  = { 0.5, 0.625, 0, 0.25 },
-    FLESHWARDEN  = { 0.75, 0.875, 0, 0.25 },
-    GUARDIAN     = { 0.875, 1, 0, 0.25 },
-    HERO         = { 0, 0.125, 0.25, 0.5 },
-    MONK         = { 0.375, 0.5, 0.25, 0.5 },
-    NECROMANCER  = { 0.5, 0.625, 0.25, 0.5 },
-    PROPHET      = { 0.875, 1, 0.25, 0.5 },
-    PYROMANCER   = { 0, 0.125, 0.5, 0.75 },
-    RANGER       = { 0.125, 0.25, 0.5, 0.75 },
-    SONOFARUGAL  = { 0.625, 0.75, 0.5, 0.75 },
-    SPIRITMAGE   = { 0.75, 0.875, 0.5, 0.75 },
-    STARCALLER   = { 0.875, 1, 0.5, 0.75 },
-    STORMBRINGER = { 0, 0.125, 0.75, 1 },
-    SUNCLERIC    = { 0.125, 0.25, 0.75, 1 },
-    TINKER       = { 0.25, 0.375, 0.75, 1 },
-    WILDWALKER   = { 0.625, 0.75, 0.75, 1 },
-    WITCHDOCTOR  = { 0.75, 0.875, 0.75, 1 },
-    WITCHHUNTER  = { 0.875, 1, 0.75, 1 },
+    BARBARIAN    = { 0.0, 0.125, 0, 0.25 }, REAPER       = { 0.25, 0.375, 0.5, 0.75 },
+    CHRONOMANCER = { 0.125, 0.25, 0, 0.25 }, CULTIST      = { 0.25, 0.375, 0, 0.25 },
+    DEMONHUNTER  = { 0.5, 0.625, 0, 0.25 }, FLESHWARDEN  = { 0.75, 0.875, 0, 0.25 },
+    GUARDIAN     = { 0.875, 1, 0, 0.25 }, HERO         = { 0, 0.125, 0.25, 0.5 },
+    MONK         = { 0.375, 0.5, 0.25, 0.5 }, NECROMANCER  = { 0.5, 0.625, 0.25, 0.5 },
+    PROPHET      = { 0.875, 1, 0.25, 0.5 }, PYROMANCER   = { 0, 0.125, 0.5, 0.75 },
+    RANGER       = { 0.125, 0.25, 0.5, 0.75 }, SONOFARUGAL  = { 0.625, 0.75, 0.5, 0.75 },
+    SPIRITMAGE   = { 0.75, 0.875, 0.5, 0.75 }, STARCALLER   = { 0.875, 1, 0.5, 0.75 },
+    STORMBRINGER = { 0, 0.125, 0.75, 1 }, SUNCLERIC    = { 0.125, 0.25, 0.75, 1 },
+    TINKER       = { 0.25, 0.375, 0.75, 1 }, WILDWALKER   = { 0.625, 0.75, 0.75, 1 },
+    WITCHDOCTOR  = { 0.75, 0.875, 0.75, 1 }, WITCHHUNTER  = { 0.875, 1, 0.75, 1 },
 }
 
 local function GetClassTextureData(class)
     if not class then return end
-    if classCoords[class] then
-        return defaultClassPath, classCoords[class]
-    end
-    if customClassCoords[class] then
-        return UI.ClassPath, customClassCoords[class]
-    end
+    if classCoords[class] then return defaultClassPath, classCoords[class] end
+    if customClassCoords[class] then return UI.ClassPath, customClassCoords[class] end
 end
 
 function UI.SetClassPortrait(portrait, unit)
@@ -80,20 +64,7 @@ function UI.SetClassPortrait(portrait, unit)
         local texturePath, texCoords = GetClassTextureData(class)
         if texturePath and texCoords then
             portrait:SetTexture(texturePath)
-
-            if parentName:find("ToT") or parentName:find("TargetTarget") then
-                portrait:SetTexCoord(unpack(texCoords))
-            else
-                local L, R, T, B = unpack(texCoords)
-                local w, h = (R - L), (B - T)
-                
-                portrait:SetTexCoord(
-                    math.max(0, L - (w * zoom)), 
-                    math.min(1, R + (w * zoom)), 
-                    math.max(0, T - (h * zoom)), 
-                    math.min(1, B + (h * zoom))
-                )
-            end
+            portrait:SetTexCoord(unpack(texCoords))
         end
     end
 
@@ -127,8 +98,6 @@ function UI.RefreshPortraits()
 
     for i = 1, 4 do
         local p = _G["PartyMemberFrame"..i.."Portrait"]
-        if p and UnitExists("party"..i) then 
-            UI.SetClassPortrait(p, "party"..i) 
-        end
+        if p and UnitExists("party"..i) then UI.SetClassPortrait(p, "party"..i) end
     end
 end

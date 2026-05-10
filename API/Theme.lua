@@ -15,20 +15,23 @@ end
 
 local function CreatePlayerNameBackground()
     if not UI.PlayerNameBG then
-        UI.PlayerNameBG = PlayerFrame:CreateTexture(nil, "ARTWORK")
+        UI.PlayerNameBG = PlayerFrame:CreateTexture(nil, "ARTWORK", nil, -1)
         UI.PlayerNameBG:SetTexture("Interface\\TargetingFrame\\UI-TargetingFrame-LevelBackground")
         
         UI.PlayerNameBG:SetPoint("TOPLEFT", PlayerFrame, "TOPLEFT", 106, -22)
-        UI.PlayerNameBG:SetPoint("BOTTOMRIGHT", PlayerFrame, "TOPRIGHT", -12, -41)
+        UI.PlayerNameBG:SetPoint("BOTTOMRIGHT", PlayerFrameHealthBar, "TOPRIGHT", 0, 1)
+        
         UI.PlayerNameBG:SetTexCoord(1, 0, 0, 1)
+    end
 
-        local _, class = UnitClass("player")
-        if class and standardClasses[class] then
-            local color = GetClassColor(class)
-            if color then
-                UI.PlayerNameBG:SetVertexColor(color.r, color.g, color.b, 1)
-            end
-        end
+    local _, class = UnitClass("player")
+    local color = GetClassColor(class)
+    
+    if color then
+        UI.PlayerNameBG:SetVertexColor(color.r, color.g, color.b, 1)
+        UI.PlayerNameBG:Show()
+    else
+        UI.PlayerNameBG:Hide()
     end
 end
 CreatePlayerNameBackground()
