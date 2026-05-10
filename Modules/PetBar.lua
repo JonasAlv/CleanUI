@@ -25,7 +25,7 @@ local function ApplyPetBarLockdown()
             if p then
                 frame:OrigSetPoint(p.pt, UIParent, p.rel, p.x, p.y)
             else
-                frame:OrigSetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 280, 5)
+                frame:OrigSetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 5, 5)
             end
         end
     end
