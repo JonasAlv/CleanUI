@@ -12,11 +12,11 @@ F:RegisterEvent("PLAYER_ENTERING_WORLD")
 local Hider = CreateFrame("Frame", "CleanUIHider", UIParent):Hide()
 local isLocking = false
 
-local function Kill(f)
+local function kill(f)
     if not f or f.isDead then return end
     
     f:Hide()
-    if f.UnregisterAllEvents then f:UnregisterAllEvents() end -- Stop logic without taint
+    if f.UnregisterAllEvents then f:UnregisterAllEvents() end
     if f.SetAlpha then f:SetAlpha(0) end
     
     if f.SetParent and f:GetObjectType() == "Frame" then
@@ -56,7 +56,6 @@ local function ApplySelectiveLockdown()
         if bonusBtn then
             bonusBtn:SetAttribute("showgrid", 1)
             ActionButton_ShowGrid(bonusBtn)
-            -- Position bonus buttons to match main buttons
             bonusBtn:ClearAllPoints()
             bonusBtn:SetPoint("CENTER", mainBtn, "CENTER", 0, 0)
         end
@@ -86,10 +85,14 @@ end
 local function ApplyCleanSkin()
     if CleanUIPositions and CleanUIPositions.MinimalistMode then
         UI.HaltModules = true
-        Kill(MainMenuBarLeftEndCap)
-        Kill(MainMenuBarRightEndCap)
+        kill(MainMenuBarLeftEndCap)
+        kill(MainMenuBarRightEndCap)
         return 
     end
+
+    kill(ActionBarUpButton)
+    kill(ActionBarDownButton)
+    kill(MainMenuBarPageNumber)
 
     local framesToDisable = {
         MainMenuBarOverlayFrame, MainMenuBarMaxLevelBar, MainMenuExpBar, 
@@ -99,7 +102,7 @@ local function ApplyCleanSkin()
         SocialsMicroButton, WorldMapMicroButton, MainMenuMicroButton, HelpMicroButton,
         MainMenuBarBackpackButton, CharacterBag0Slot, CharacterBag1Slot, CharacterBag2Slot, CharacterBag3Slot, KeyRingButton
     }
-    for _, f in ipairs(framesToDisable) do Kill(f) end
+    for _, f in ipairs(framesToDisable) do kill(f) end
 
     local texturesToHide = {
         MainMenuBarTexture0, MainMenuBarTexture1, MainMenuBarTexture2, MainMenuBarTexture3,
@@ -107,7 +110,7 @@ local function ApplyCleanSkin()
         BonusActionBarTexture0, BonusActionBarTexture1,
         MainMenuBarLeftEndCap, MainMenuBarRightEndCap
     }
-    for _, tex in ipairs(texturesToHide) do Kill(tex) end
+    for _, tex in ipairs(texturesToHide) do kill(tex) end
 
     ApplySelectiveLockdown()
 end
@@ -115,7 +118,7 @@ end
 hooksecurefunc("ShowBonusActionBar", function()
     for i = 1, 12 do
         local btn = _G["ActionButton"..i]
-        if btn then btn:SetAlpha(0) end -- Use Alpha to avoid potential secure header taint
+        if btn then btn:SetAlpha(0) end
     end
 end)
 

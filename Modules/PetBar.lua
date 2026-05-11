@@ -44,7 +44,7 @@ local function InitPetBar()
 
     if not CleanUIPositions["PetBar"] then
         PetActionBarFrame:ClearAllPoints()
-        PetActionBarFrame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 280, 5)
+        PetActionBarFrame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 5, 5)
     end
 
     Lobotomize(PetActionBarFrame)

@@ -36,7 +36,9 @@ local function StyleTooltip(self)
         if unit and UnitIsPlayer(unit) then
             local _, class = UnitClass(unit)
             local color = RAID_CLASS_COLORS[class]
-            if color then GameTooltipStatusBar:SetStatusBarColor(color.r, color.g, color.b) end
+            if color then 
+                GameTooltipStatusBar:SetStatusBarColor(color.r, color.g, color.b) 
+            end
         end
     end
 end
@@ -45,47 +47,47 @@ GameTooltip:HookScript("OnShow", StyleTooltip)
 GameTooltip:HookScript("OnUpdate", StyleTooltip)
 
 UIErrorsFrame:UnregisterEvent("UI_ERROR_MESSAGE")
+
 local ErrorGatekeeper = CreateFrame("Frame")
 ErrorGatekeeper:RegisterEvent("UI_ERROR_MESSAGE")
 
-local BlacklistedErrors = {}
-local function AddToBlacklist(constant)
-    if constant and type(constant) == "string" then
-        BlacklistedErrors[constant] = true
+local ExactBlacklist = {}
+
+local function SafeAdd(constant)
+    if constant then
+        ExactBlacklist[constant] = true
     end
 end
 
-AddToBlacklist(ERR_NO_ATTACK_TARGET)
-AddToBlacklist(ERR_ATTACK_NONTARGET)
-AddToBlacklist(ERR_INVALID_TARGET)
-AddToBlacklist(ERR_OUT_OF_RANGE)
-AddToBlacklist(ERR_SPELL_COOLDOWN)
-AddToBlacklist(SPELL_FAILED_OUT_OF_RANGE)
-AddToBlacklist(SPELL_FAILED_NOT_READY)
-AddToBlacklist(ERR_ABILITY_COOLDOWN)
+SafeAdd(ERR_OUT_OF_ENERGY)
+SafeAdd(ERR_OUT_OF_MANA)
+SafeAdd(ERR_OUT_OF_RAGE)
+SafeAdd(ERR_NO_ATTACK_TARGET)
+SafeAdd(ERR_INVALID_TARGET)
+SafeAdd(ERR_OUT_OF_RANGE)
+SafeAdd(ERR_SPELL_COOLDOWN)
+SafeAdd(ERR_ABILITY_COOLDOWN)
+SafeAdd(ERR_BADATTACKFACING)
+SafeAdd(ERR_BADATTACKPOS)
+SafeAdd(SPELL_FAILED_NOT_READY)
+SafeAdd(SPELL_FAILED_OUT_OF_RANGE)
 
-local BlacklistKeywords = {
-    "target",      
-    "moving",      
-    "close",       
-    "interrupted", 
-    "range",       
-    "ready",       
+local FallbackKeywords = {
+    "moving", "interrupted", "silenced", "stunned", "dead", "reagents", "focus"
 }
 
 ErrorGatekeeper:SetScript("OnEvent", function(self, event, msg)
     if not msg then return end
-    
-    local lowerMsg = msg:lower()
 
-    for _, keyword in ipairs(BlacklistKeywords) do
-        if lowerMsg:find(keyword) then
+    if ExactBlacklist[msg] then return end
+
+    local lowerMsg = msg:lower()
+    for _, pattern in ipairs(FallbackKeywords) do
+        if lowerMsg:find(pattern) then
             return
         end
     end
 
-    if BlacklistedErrors[msg] then return end
-    
     UIErrorsFrame:AddMessage(msg, 1.0, 0.1, 0.1, 1.0)
 end)
 
@@ -94,7 +96,12 @@ CombatWatch:RegisterEvent("PLAYER_REGEN_DISABLED")
 CombatWatch:SetScript("OnEvent", function()
     if GameTooltip:IsShown() then
         local hasItem, hasSpell = GameTooltip:GetItem(), GameTooltip:GetSpell()
-        local isAura = (GameTooltip:GetOwner() and GameTooltip:GetOwner():GetName() or ""):find("Buff")
-        if not (hasItem or hasSpell or isAura) then GameTooltip:Hide() end
+        local owner = GameTooltip:GetOwner()
+        local ownerName = owner and owner:GetName() or ""
+        local isAura = ownerName:find("Buff") or ownerName:find("Debuff")
+
+        if not (hasItem or hasSpell or isAura) then 
+            GameTooltip:Hide() 
+        end
     end
 end)
