@@ -7,12 +7,12 @@ Setup:RegisterEvent("PLAYER_ENTERING_WORLD")
 Setup:SetScript("OnEvent", function(self, event)
     CleanUIPositions = CleanUIPositions or {}
     
-    if CleanUI_UseClassPortraits == nil then 
-        CleanUI_UseClassPortraits = true 
+    if CleanUIClassPortraits == nil then 
+        CleanUIClassPortraits = true 
     end
     
-    if CleanUIPositions.MinimalistMode == nil then 
-        CleanUIPositions.MinimalistMode = true 
+    if CleanUIPositions.HideGryphons == nil then 
+        CleanUIPositions.HideGryphons = true 
     end
 
     if TargetFrameToTHealthBar then UI.ProtectFrame(TargetFrameToTHealthBar) end
@@ -21,17 +21,17 @@ end)
 
 SLASH_CLEANUI1 = "/cui"
 SlashCmdList["CLEANUI"] = function(msg)
-    msg = msg:lower()
+    msg = (msg or ""):lower()
     
     if msg == "reset" then
         CleanUIPositions = {} 
-        CleanUIPositions.MinimalistMode = true 
+        CleanUIPositions.HideGryphons = true 
 
         local frames = {
             PlayerFrame, TargetFrame, FocusFrame, PetFrame, 
             TargetFrameToT, FocusFrameToT, 
-            CleanUILootAnchor, CleanUIActionBarAnchor, CleanUIPartyAnchor,
-            CleanUIPetBarAnchor, CleanUIStanceBarAnchor, CleanUIMicroMenuAnchor, CleanUIBagBarAnchor,
+            CleanUIPartyAnchor, CleanUIPetBarAnchor, 
+            CleanUIStanceBarAnchor, CleanUIMicroMenuAnchor, CleanUIBagBarAnchor,
         }
         
         for i = 1, 4 do
@@ -47,13 +47,8 @@ SlashCmdList["CLEANUI"] = function(msg)
             end 
         end
 
-        print("|cff00ff00CleanUI:|r UI reset to Blizzlike (Gryphons Hidden). Reloading...")
+        print("|cff00ff00CleanUI:|r UI reset to defaults (Gryphons Hidden). Reloading...")
         ReloadUI()
-
-    elseif msg:find("loot") and msg:find("test") then
-        CleanUI_LootTestActive = not CleanUI_LootTestActive
-        if UI.UpdateLootTest then UI.UpdateLootTest() end
-        print("|cff00ff00CleanUI:|r Loot Test Mode " .. (CleanUI_LootTestActive and "|cff00ff00Enabled|r" or "|cffff0000Disabled|r"))
 
     elseif msg:find("party") and msg:find("test") then
         CleanUI_TestActive = not CleanUI_TestActive
@@ -61,7 +56,7 @@ SlashCmdList["CLEANUI"] = function(msg)
         print("|cff00ff00CleanUI:|r Party Test Mode " .. (CleanUI_TestActive and "|cff00ff00Enabled|r" or "|cffff0000Disabled|r"))
 
     elseif msg == "portrait" then
-        CleanUI_UseClassPortraits = not CleanUI_UseClassPortraits
+        CleanUIClassPortraits = not CleanUIClassPortraits
         if UI.RefreshPortraits then UI.RefreshPortraits() end
         print("|cff00ff00CleanUI:|r Portraits toggled.")
     end

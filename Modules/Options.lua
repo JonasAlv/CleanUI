@@ -1,14 +1,20 @@
 local _, UI = ...
 
-local function ToggleBlizzlikeMode()
+local function UpdateGryphons()
     CleanUIPositions = CleanUIPositions or {}
-    CleanUIPositions.MinimalistMode = not CleanUIPositions.MinimalistMode
-    
-    print("|cff00ff00CleanUI:|r Blizzlike Mode (Hide Gryphons) " .. 
-        (CleanUIPositions.MinimalistMode and "|cff00ff00Enabled|r" or "|cffff0000Disabled|r") .. 
-        ". Reloading UI...")
-        
-    ReloadUI()
+    if CleanUIPositions.HideGryphons then
+        MainMenuBarLeftEndCap:Hide()
+        MainMenuBarRightEndCap:Hide()
+    else
+        MainMenuBarLeftEndCap:Show()
+        MainMenuBarRightEndCap:Show()
+    end
+end
+
+local function ToggleGryphons()
+    CleanUIPositions = CleanUIPositions or {}
+    CleanUIPositions.HideGryphons = not CleanUIPositions.HideGryphons
+    UpdateGryphons()
 end
 
 local button = _G["CleanUIMinimapButton"] or CreateFrame("Button", "CleanUIMinimapButton", Minimap)
@@ -63,7 +69,6 @@ local function InitializeMenu(self, level)
 
     local items = {
         {t="Toggle Portraits", c="portrait"}, 
-        {t="Loot Test Mode", c="loot test"}, 
         {t="Party Test Mode", c="party test"}
     }
     
@@ -75,9 +80,9 @@ local function InitializeMenu(self, level)
     end
 
     info = UIDropDownMenu_CreateInfo()
-    info.text = "Blizzlike Mode (Hide Gryphons)"
-    info.func = ToggleBlizzlikeMode
-    info.checked = CleanUIPositions and CleanUIPositions.MinimalistMode
+    info.text = "Hide Main Bar Gryphons"
+    info.func = ToggleGryphons
+    info.checked = CleanUIPositions and CleanUIPositions.HideGryphons
     UIDropDownMenu_AddButton(info)
 
     info = UIDropDownMenu_CreateInfo()
@@ -108,4 +113,7 @@ button:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
 local Init = CreateFrame("Frame")
 Init:RegisterEvent("PLAYER_LOGIN")
-Init:SetScript("OnEvent", function() UpdateMinimapButtonPos() end)
+Init:SetScript("OnEvent", function() 
+    UpdateMinimapButtonPos() 
+    UpdateGryphons()
+end)

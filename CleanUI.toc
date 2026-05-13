@@ -3,26 +3,18 @@
 ## SavedVariables: CleanUIPositions, CleanUI_UseClassPortraits
 ## Notes: Default UI overhaul
 ## Author: @jonasalv @narchda
-## Version: 1.1.8
+## Version: 1.1.9
 
 # 1. Initialize
 Core.lua
 
 # 2. Load Tools
-API\Mover.lua
-API\Portraits.lua
-API\Theme.lua
+tools\Mover.lua
+tools\Portraits.lua
+tools\Theme.lua
 
 # 3. Load Modules
-modules\ActionBar.lua
 modules\Tooltip.lua
 modules\Party.lua
-modules\Loot.lua
 modules\Options.lua
 modules\UnitFrames.lua
-modules\MicroMenu.lua
-modules\PetBar.lua
-modules\StanceBar.lua
-modules\BagBar.lua
-modules\ExperienceBar.lua
-modules\TotemBar.lua
