@@ -18,18 +18,6 @@ local classCoords = {
 }
 
 local customClassCoords = {
-    DRUID        = { 0.625, 0.75, 0, 0.25 },
-    WARRIOR      = { 0.5, 0.625, 0.75, 1 },
-    PALADIN      = { 0.625, 0.75, 0.25, 0.5 },
-    HUNTER       = { 0.125, 0.25, 0.25, 0.5 },
-    ROGUE        = { 0.375, 0.5, 0.5, 0.75 },
-    PRIEST       = { 0.75, 0.875, 0.25, 0.5 },
-    DEATHKNIGHT  = { 0.375, 0.5, 0, 0.25 },
-    SHAMAN       = { 0.5, 0.625, 0.5, 0.75 },
-    MAGE         = { 0.25, 0.375, 0.25, 0.5 },
-    WARLOCK      = { 0.375, 0.5, 0.75, 1 },
-
-
     BARBARIAN    = { 0.0, 0.125, 0, 0.25 },
     REAPER       = { 0.25, 0.375, 0.5, 0.75 },
     CHRONOMANCER = { 0.125, 0.25, 0, 0.25 },
@@ -65,7 +53,8 @@ function UI.SetClassPortrait(portrait, unit)
     if not portrait or not unit then return false end
 
     local isPet = UnitIsUnit(unit, "pet") or UnitIsUnit(unit, "partypet")
-    if CleanUI_UseClassPortraits == false or not UnitIsPlayer(unit) or isPet then
+    
+    if CleanUIClassPortraits == false or not UnitIsPlayer(unit) or isPet then
         if not bypassSetPortrait then
             bypassSetPortrait = true
             SetPortraitTexture(portrait, unit)

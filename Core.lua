@@ -58,7 +58,7 @@ SlashCmdList["CLEANUI"] = function(msg)
     elseif msg == "portrait" then
         CleanUIClassPortraits = not CleanUIClassPortraits
         if UI.RefreshPortraits then UI.RefreshPortraits() end
-        print("|cff00ff00CleanUI:|r Portraits toggled.")
+        print("|cff00ff00CleanUI:|r Portraits set to " .. (CleanUIClassPortraits and "|cff00ff00Class Icons|r" or "|cffff00003D Faces|r"))
     end
 end
 
