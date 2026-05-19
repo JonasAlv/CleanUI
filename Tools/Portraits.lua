@@ -4,6 +4,23 @@ UI.ClassPath = "Interface\\Glues\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES-RO
 local defaultClassPath = "Interface\\AddOns\\CleanUI\\Media\\classes.blp"
 local bypassSetPortrait = false
 
+-- Strict explicit list of allowed portrait objects
+local AllowedPortraits = {
+    [PlayerPortrait] = true,
+    [TargetFramePortrait] = true,
+    [FocusFramePortrait] = true,
+    [TargetFrameToTPortrait] = true,
+    [FocusFrameToTPortrait] = true,
+    [CharacterFramePortrait] = true,
+}
+
+for i = 1, 4 do
+    local partyPortrait = _G["PartyMemberFrame"..i.."Portrait"]
+    if partyPortrait then
+        AllowedPortraits[partyPortrait] = true
+    end
+end
+
 local classCoords = {
     DRUID        = { 0.625, 0.75, 0, 0.25 },
     WARRIOR      = { 0.5, 0.625, 0.75, 1 },
@@ -52,8 +69,12 @@ function UI.SetClassPortrait(portrait, unit)
     if type(portrait) == "string" then portrait = _G[portrait] end
     if not portrait or not unit then return false end
 
+    local isInspect = (InspectFramePortrait and portrait == InspectFramePortrait)
+    if not AllowedPortraits[portrait] and not isInspect then
+        return false
+    end
+
     local isPet = UnitIsUnit(unit, "pet") or UnitIsUnit(unit, "partypet")
-    
     if CleanUIClassPortraits == false or not UnitIsPlayer(unit) or isPet then
         if not bypassSetPortrait then
             bypassSetPortrait = true
@@ -62,13 +83,6 @@ function UI.SetClassPortrait(portrait, unit)
         end
         portrait:SetTexCoord(0, 1, 0, 1)
         return true
-    end
-
-    local name = portrait:GetName() or ""
-    local parent = portrait:GetParent()
-    local parentName = parent and parent:GetName() or ""
-    if parentName:find("MicroButton") or name:find("SideTab") or parentName:find("SideTab") then
-        return false
     end
 
     local _, class = UnitClass(unit)
