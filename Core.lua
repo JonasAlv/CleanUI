@@ -17,6 +17,10 @@ Setup:SetScript("OnEvent", function(self, event)
 
     if TargetFrameToTHealthBar then UI.ProtectFrame(TargetFrameToTHealthBar) end
     if FocusFrameToTHealthBar then UI.ProtectFrame(FocusFrameToTHealthBar) end
+    
+    if UI.RefreshPortraits then 
+        UI.RefreshPortraits() 
+    end
 end)
 
 SLASH_CLEANUI1 = "/cui"
@@ -26,6 +30,7 @@ SlashCmdList["CLEANUI"] = function(msg)
     if msg == "reset" then
         CleanUIPositions = {} 
         CleanUIPositions.HideGryphons = true 
+        CleanUIClassPortraits = true
 
         local frames = {
             PlayerFrame, TargetFrame, FocusFrame, PetFrame, 

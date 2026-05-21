@@ -1,9 +1,9 @@
 ## Interface: 30300
 ## Title: CleanUI
-## SavedVariables: CleanUIPositions, CleanUI_UseClassPortraits
+## SavedVariables: CleanUIPositions, CleanUIClassPortraits
 ## Notes: Default UI overhaul
 ## Author: @jonasalv @narchda
-## Version: 1.2.0
+## Version: 1.2.1
 
 # 1. Initialize
 Core.lua
