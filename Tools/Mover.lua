@@ -14,13 +14,13 @@ local function ShowAlignmentGrid()
         local centerY = height / 2
 
         local vCenter = GridFrame:CreateTexture(nil, "ARTWORK")
-        vCenter:SetColorTexture(0, 1, 0, 0.8)
+        vCenter:SetTexture(0, 1, 0, 0.8)
         vCenter:SetWidth(1)
         vCenter:SetPoint("TOP", GridFrame, "TOP", 0, 0)
         vCenter:SetPoint("BOTTOM", GridFrame, "BOTTOM", 0, 0)
 
         local hCenter = GridFrame:CreateTexture(nil, "ARTWORK")
-        hCenter:SetColorTexture(0, 1, 0, 0.8)
+        hCenter:SetTexture(0, 1, 0, 0.8)
         hCenter:SetHeight(1)
         hCenter:SetPoint("LEFT", GridFrame, "LEFT", 0, 0)
         hCenter:SetPoint("RIGHT", GridFrame, "RIGHT", 0, 0)
@@ -29,7 +29,7 @@ local function ShowAlignmentGrid()
         for i = -numCols, numCols do
             if i ~= 0 then
                 local line = GridFrame:CreateTexture(nil, "BACKGROUND")
-                line:SetColorTexture(0, 0, 0, 0.6)
+                line:SetTexture(0, 0, 0, 0.6)
                 line:SetWidth(1)
                 line:SetPoint("TOPLEFT", GridFrame, "TOPLEFT", centerX + (i * size), 0)
                 line:SetPoint("BOTTOMLEFT", GridFrame, "BOTTOMLEFT", centerX + (i * size), 0)
@@ -40,7 +40,7 @@ local function ShowAlignmentGrid()
         for i = -numRows, numRows do
             if i ~= 0 then
                 local line = GridFrame:CreateTexture(nil, "BACKGROUND")
-                line:SetColorTexture(0, 0, 0, 0.6)
+                line:SetTexture(0, 0, 0, 0.6)
                 line:SetHeight(1)
                 line:SetPoint("TOPLEFT", GridFrame, "TOPLEFT", 0, -(centerY + (i * size)))
                 line:SetPoint("TOPRIGHT", GridFrame, "TOPRIGHT", 0, -(centerY + (i * size)))
