@@ -54,9 +54,16 @@ local function HideAlignmentGrid()
     if GridFrame then GridFrame:Hide() end
 end
 
+local WelcomeMessageShown = false
+
 function UI.MakeMovableAndSave(frame, name)
     if not frame or frame.isMovableSet then return end
     CleanUIPositions = CleanUIPositions or {}
+
+    if not WelcomeMessageShown then
+        print("|cff00ff00CleanUI:|r Hold Shift + Control + Left-Click to move frames.")
+        WelcomeMessageShown = true
+    end
 
     frame:SetMovable(true)
     frame:SetClampedToScreen(true)

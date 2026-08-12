@@ -69,7 +69,7 @@ local function InitializeMenu(self, level)
 
     local items = {
         {t="Toggle Portraits", c="portrait"}, 
-        {t="Party Test Mode", c="party test"}
+        {t="Party Test Mode(move frames)", c="party test"}
     }
     
     for _, v in ipairs(items) do

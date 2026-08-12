@@ -1,11 +1,10 @@
 local _, UI = ...
 
 hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
-    local isMinimalist = CleanUIPositions and CleanUIPositions.MinimalistMode
-    local yOffset = isMinimalist and 25 or 120
-
     tooltip:SetOwner(parent, "ANCHOR_NONE")
-    tooltip:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -25, yOffset)
+    tooltip:SetClampedToScreen(true)
+    tooltip:ClearAllPoints()
+    tooltip:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -15, 15)
 end)
 
 local function StyleTooltip(self)
