@@ -18,3 +18,6 @@ modules\Tooltip.lua
 modules\Party.lua
 modules\Options.lua
 modules\UnitFrames.lua
+modules\CharItems.lua
+modules\StatsColors.lua
+modules\DetailsTheme.lua

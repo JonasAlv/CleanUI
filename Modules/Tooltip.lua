@@ -1,11 +1,33 @@
 local _, UI = ...
 
+-- Positioning & Styling
 hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
     tooltip:SetOwner(parent, "ANCHOR_NONE")
     tooltip:SetClampedToScreen(true)
     tooltip:ClearAllPoints()
     tooltip:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -15, 15)
 end)
+
+local function ApplyTooltipOutline(tooltip)
+    local name = tooltip:GetName()
+    if not name then return end
+    for i = 1, tooltip:NumLines() do
+        local left = _G[name .. "TextLeft" .. i]
+        if left then
+            local font, size, flags = left:GetFont()
+            if font and flags ~= "OUTLINE" and flags ~= "MONOCHROMEOUTLINE" then
+                left:SetFont(font, size, "OUTLINE")
+            end
+        end
+        local right = _G[name .. "TextRight" .. i]
+        if right then
+            local font, size, flags = right:GetFont()
+            if font and flags ~= "OUTLINE" and flags ~= "MONOCHROMEOUTLINE" then
+                right:SetFont(font, size, "OUTLINE")
+            end
+        end
+    end
+end
 
 local function StyleTooltip(self)
     local hasItem, hasSpell = self:GetItem(), self:GetSpell()
@@ -20,17 +42,21 @@ local function StyleTooltip(self)
 
     if not self:IsShown() then return end
 
-    if hasItem or hasSpell then
+    if self == GameTooltip and (hasItem or hasSpell) then
         self:ClearAllPoints()
         local x, y = GetCursorPosition()
         local scale = self:GetEffectiveScale()
         self:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", (x / scale) + 15, (y / scale) + 15)
     end
 
-    self:SetBackdropColor(0.05, 0.05, 0.05, 0.8)
+    -- Darkened background and clean border
+    self:SetBackdropColor(0.01, 0.01, 0.01, 0.92)
     self:SetBackdropBorderColor(0.15, 0.15, 0.15)
 
-    if GameTooltipStatusBar then
+    -- Apply text outline for readability
+    ApplyTooltipOutline(self)
+
+    if GameTooltipStatusBar and self == GameTooltip then
         local _, unit = self:GetUnit()
         if unit and UnitIsPlayer(unit) then
             local _, class = UnitClass(unit)
@@ -42,9 +68,15 @@ local function StyleTooltip(self)
     end
 end
 
-GameTooltip:HookScript("OnShow", StyleTooltip)
-GameTooltip:HookScript("OnUpdate", StyleTooltip)
+local Tooltips = { GameTooltip, ItemRefTooltip, ShoppingTooltip1, ShoppingTooltip2 }
+for _, tt in ipairs(Tooltips) do
+    if tt then
+        tt:HookScript("OnShow", StyleTooltip)
+        tt:HookScript("OnUpdate", StyleTooltip)
+    end
+end
 
+-- Hide Error Message
 UIErrorsFrame:UnregisterEvent("UI_ERROR_MESSAGE")
 
 local ErrorGatekeeper = CreateFrame("Frame")
@@ -90,6 +122,7 @@ ErrorGatekeeper:SetScript("OnEvent", function(self, event, msg)
     UIErrorsFrame:AddMessage(msg, 1.0, 0.1, 0.1, 1.0)
 end)
 
+-- Combat  (Tooltip Hiding)
 local CombatWatch = CreateFrame("Frame")
 CombatWatch:RegisterEvent("PLAYER_REGEN_DISABLED")
 CombatWatch:SetScript("OnEvent", function()
