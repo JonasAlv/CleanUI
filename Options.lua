@@ -168,7 +168,7 @@ Init:SetScript("OnEvent", function()
         end
         mmButton.cuText = mmButton.cuText or mmButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
         mmButton.cuText:SetPoint("CENTER", mmButton, "CENTER", 1, 1)
-        mmButton.cuText:SetText("CU")
+        mmButton.cuText:SetText("cui")
         mmButton.cuText:SetTextColor(1, 0.82, 0)
     end
     
