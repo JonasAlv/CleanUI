@@ -1,6 +1,84 @@
 local _, UI = ...
 UI.Modules = {}
 
+local standardClasses = {
+    WARRIOR = true, PALADIN = true, HUNTER = true, ROGUE = true,
+    PRIEST = true, DEATHKNIGHT = true, SHAMAN = true, MAGE = true,
+    WARLOCK = true, DRUID = true,
+    BARBARIAN = true, REAPER = true, CHRONOMANCER = true, CULTIST = true, DEMONHUNTER = true,
+    FLESHWARDEN = true, GUARDIAN = true, HERO = true, MONK = true, NECROMANCER = true, PROPHET = true, PYROMANCER = true,
+    RANGER = true, SONOFARUGAL = true, SPIRITMAGE = true, STARCALLER = true, STORMBRINGER = true, SUNCLERIC = true, TINKER = true, WILDWALKER = true, WITCHDOCTOR = true, WITCHHUNTER = true
+}
+
+local function GetClassColor(class)
+    return RAID_CLASS_COLORS[class]
+end
+
+function UI.ProtectFrame(healthBar)
+    if not healthBar or healthBar.hooked then return end
+
+    hooksecurefunc(healthBar, "SetStatusBarColor", function(self, r, g, b)
+        if self.isCleanUI_Updating then return end
+        local parent = self:GetParent()
+        local unit = parent.unit or (parent:GetParent() and parent:GetParent().unit)
+        
+        if unit and UnitIsPlayer(unit) then
+            local _, tClass = UnitClass(unit)
+            if tClass and standardClasses[tClass] then
+                local color = GetClassColor(tClass)
+                if color then
+                    self.isCleanUI_Updating = true
+                    self:SetStatusBarColor(color.r, color.g, color.b)
+                    self.isCleanUI_Updating = false
+                end
+            end
+        end
+    end)
+    healthBar.hooked = true
+end
+
+function UI.ApplyClassTheme(unit)
+    if not (unit and UnitExists(unit)) then return end
+
+    if not UnitIsPlayer(unit) then 
+        local p = (unit == "player" and PlayerPortrait) or 
+                  (unit == "target" and TargetFramePortrait) or 
+                  (unit == "focus" and FocusFramePortrait)
+        if p and UI.SetClassPortrait then UI.SetClassPortrait(p, unit) end
+        return 
+    end
+
+    local main, p
+    if unit == "player" then main, p = PlayerFrame, PlayerPortrait
+    elseif unit == "target" then main, p = TargetFrame, TargetFramePortrait
+    elseif unit == "focus" then main, p = FocusFrame, FocusFramePortrait
+    elseif unit == "targettarget" then main, p = TargetFrameToT, TargetFrameToTPortrait
+    elseif unit == "focustarget" then main, p = FocusFrameToT, FocusFrameToTPortrait
+    elseif unit == "pet" then main, p = PetFrame, PetPortrait
+    else
+        local partyId = string.match(unit, "^party(%d)$")
+        if partyId then
+            main, p = _G["PartyMemberFrame"..partyId], _G["PartyMemberFrame"..partyId.."Portrait"]
+        end
+    end
+
+    local _, classToUse = UnitClass(unit)
+    if classToUse and standardClasses[classToUse] then
+        local color = GetClassColor(classToUse)
+        if color then
+            if unit == "player" and UI.PlayerNameBG then
+                UI.PlayerNameBG:SetVertexColor(color.r, color.g, color.b, 1)
+            elseif main and main.nameBackground then
+                main.nameBackground:SetVertexColor(color.r, color.g, color.b, 1)
+            end
+        end
+    end
+
+    if UI.SetClassPortrait then
+        UI.SetClassPortrait(p, unit)
+    end
+end
+
 local Setup = CreateFrame("Frame")
 Setup:RegisterEvent("PLAYER_LOGIN")
 Setup:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -30,6 +108,9 @@ Setup:SetScript("OnEvent", function(self, event)
         if CleanUIPositions.EnableParty and UI.Modules["Party"] then UI.Modules["Party"]() end
         if CleanUIPositions.EnableTooltip and UI.Modules["Tooltip"] then UI.Modules["Tooltip"]() end
         if CleanUIPositions.EnableUnitFrames and UI.Modules["UnitFrames"] then UI.Modules["UnitFrames"]() end
+        
+        -- Portraits always load as a core utility tool when UI is active
+        if UI.Modules["Portraits"] then UI.Modules["Portraits"]() end
     end
 
     if TargetFrameToTHealthBar then UI.ProtectFrame(TargetFrameToTHealthBar) end

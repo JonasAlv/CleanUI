@@ -3,7 +3,7 @@
 ## SavedVariables: CleanUIPositions, CleanUIClassPortraits
 ## Notes: Default UI overhaul
 ## Author: @jonasalv @narchda
-## Version: 1.2.2
+## Version: 2.0.0
 
 # Libraries
 Libs\LibStub\LibStub.lua
@@ -14,19 +14,17 @@ Libs\AceConfig-3.0\AceConfig-3.0.xml
 Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
 
-# 1. Initialize
+#Initialize
 Core.lua
+Options.lua
+Mover.lua
 
-# 2. Tools
-tools\Mover.lua
-tools\Portraits.lua
-tools\Theme.lua
 
-# 3. Modules
+#Modules
 modules\Tooltip.lua
 modules\Party.lua
-modules\Options.lua
 modules\UnitFrames.lua
 modules\CharItems.lua
 modules\StatsColors.lua
 modules\TooltipsTheming.lua
+modules\Portraits.lua

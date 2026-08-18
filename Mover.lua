@@ -118,3 +118,13 @@ function UI.MakeMovableAndSave(frame, name)
 
     frame.isMovableSet = true
 end
+
+local CoreMoverInit = CreateFrame("Frame")
+CoreMoverInit:RegisterEvent("PLAYER_LOGIN")
+CoreMoverInit:SetScript("OnEvent", function(self)
+    if PlayerFrame then UI.MakeMovableAndSave(PlayerFrame, "PlayerFrame") end
+    if TargetFrame then UI.MakeMovableAndSave(TargetFrame, "TargetFrame") end
+    if FocusFrame then UI.MakeMovableAndSave(FocusFrame, "FocusFrame") end
+    if CleanUIPartyAnchor then UI.MakeMovableAndSave(CleanUIPartyAnchor, "PartyAnchor") end
+    self:UnregisterAllEvents()
+end)
